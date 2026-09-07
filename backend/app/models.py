@@ -1,2 +1,18 @@
-# Modelo SQLAlchemy "Producto".
-# Campos: id, codigo (unico, indexado), nombre, stock, actualizado_en.
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.sql import func
+
+from app.database import Base
+
+
+class Producto(Base):
+    __tablename__ = "productos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    codigo = Column(String, unique=True, index=True, nullable=False)
+    nombre = Column(String, nullable=False)
+    stock = Column(Integer, nullable=False, default=0)
+    actualizado_en = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
