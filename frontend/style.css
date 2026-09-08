@@ -388,8 +388,13 @@ body {
   background: var(--secundario-suave);
 }
 .tabla-productos .acciones {
-  display: flex;
-  gap: 6px;
+  white-space: nowrap;
+}
+.tabla-productos .acciones button {
+  margin-right: 6px;
+}
+.tabla-productos .acciones button:last-child {
+  margin-right: 0;
 }
 
 /* ---- Modal generico (crear/editar producto, reponer stock) ---- */
