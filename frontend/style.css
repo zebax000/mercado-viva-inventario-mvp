@@ -383,7 +383,8 @@ body {
 .tabla-productos img {
   width: 38px;
   height: 38px;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 3px;
   border-radius: var(--radio);
   background: var(--secundario-suave);
 }
