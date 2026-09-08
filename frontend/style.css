@@ -378,6 +378,9 @@ body {
   border-bottom: 1px solid var(--borde);
   vertical-align: middle;
 }
+.tabla-productos tr:last-child td {
+  border-bottom: none;
+}
 .tabla-productos img {
   width: 38px;
   height: 38px;
