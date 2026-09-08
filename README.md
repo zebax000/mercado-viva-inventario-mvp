@@ -12,13 +12,12 @@ Mercado VIVA tiene tres canales (tienda fisica, web, app) pero solo el punto de 
 
 **Incluido:**
 - Consulta de stock de un producto.
-- Listado general de inventario.
-- Registro de productos nuevos, edicion y eliminacion (CRUD completo) desde el panel de empleado.
 - Actualizacion de stock por venta, reposicion o correccion manual.
-- Acceso al panel de empleado protegido por un codigo compartido simple (no es autenticacion con roles ni usuarios individuales).
+- Listado general de inventario.
+- Registro, edicion y eliminacion de productos desde el panel de empleado (soporte operativo para mantener el catalogo).
 
 **Excluido explicitamente:**
-- Autenticacion de usuarios con roles y permisos.
+- Autenticacion de usuarios con roles y permisos (el panel de empleado usa un codigo compartido simple, no cuentas individuales).
 - Sincronizacion automatica con un POS fisico real.
 - Manejo de condiciones de carrera por compras simultaneas.
 - Notificaciones automaticas de stock bajo.
@@ -33,7 +32,6 @@ Mercado VIVA tiene tres canales (tienda fisica, web, app) pero solo el punto de 
 | HU3 | Como empleado, quiero registrar una reposicion que incremente el stock. |
 | HU4 | Como empleado, quiero ver un listado general de inventario con el stock actual de todos los productos. |
 | HU5 | Como empleado, quiero corregir manualmente el stock de un producto tras un conteo fisico. |
-| HU6 | Como empleado, quiero crear, editar y eliminar productos del catalogo, para mantener el inventario actualizado. |
 
 ## Arquitectura y stack
 
@@ -52,7 +50,7 @@ mercado-viva-inventario-mvp/
 │   │   ├── models.py      # Modelo SQLAlchemy: Producto
 │   │   ├── schemas.py     # Esquemas Pydantic de entrada/salida
 │   │   ├── database.py    # Conexion a la base de datos (Neon)
-│   │   └── crud.py        # Logica de negocio: consulta, CRUD, ajuste de stock, acceso
+│   │   └── crud.py        # Logica de negocio: consulta, ajuste de stock, alta/edicion/baja de productos, acceso
 │   ├── tests/
 │   │   ├── conftest.py        # Fixtures de BD de prueba (SQLite en memoria) y TestClient
 │   │   └── test_productos.py  # Pruebas de flujo exitoso y casos excepcionales
@@ -60,26 +58,26 @@ mercado-viva-inventario-mvp/
 │   └── .env.example
 ├── frontend/
 │   ├── index.html    # Catalogo publico: busqueda, tarjetas de producto, carrito simulado
-│   ├── empleado.html # Acceso por codigo + panel CRUD de inventario
+│   ├── empleado.html # Acceso por codigo + panel de inventario
 │   ├── style.css
 │   ├── script.js     # Logica del catalogo (fetch, carrito, checkout simulado)
 │   ├── cliente.js    # Animaciones y overlay de confirmacion de compra
-│   └── empleado.js   # Logica del panel de empleado (CRUD, reponer stock, validaciones de input)
+│   └── empleado.js   # Logica del panel de empleado (listado, ajuste de stock, alta/edicion/baja de productos)
 └── docs/
     └── bpmn/         # Diagrama BPMN del proceso (imagen/xml de Bizagi)
 ```
 
 ## Endpoints de la API
 
-| Metodo | Ruta | Descripcion | Historias que cubre |
-|--------|------|-------------|----------------------|
-| GET | `/productos/{codigo}` | Consultar un producto | HU1 |
-| GET | `/productos` | Listado general de inventario | HU4 |
-| POST | `/productos` | Crear un producto nuevo | HU6 |
-| PUT | `/productos/{codigo}` | Editar nombre, precio o imagen de un producto | HU6 |
-| DELETE | `/productos/{codigo}` | Eliminar un producto | HU6 |
-| POST | `/productos/{codigo}/stock/ajuste` | Ajustar stock: `venta`, `reposicion` o `correccion` | HU2, HU3, HU5 |
-| POST | `/empleado/verificar` | Validar el codigo de acceso al panel de empleado | — |
+| Metodo | Ruta | Historias que cubre |
+|--------|------|----------------------|
+| GET | `/productos/{codigo}` | HU1 — Consulta |
+| GET | `/productos` | HU4 — Listado |
+| POST | `/productos/{codigo}/stock/ajuste` | HU2, HU3, HU5 — Actualizar stock |
+| POST | `/productos` | — (soporte operativo: alta de productos) |
+| PUT | `/productos/{codigo}` | — (soporte operativo: edicion de nombre/precio/imagen) |
+| DELETE | `/productos/{codigo}` | — (soporte operativo: baja de productos) |
+| POST | `/empleado/verificar` | — (soporte operativo: acceso al panel) |
 
 Formato de error consistente en todos los endpoints:
 
@@ -132,7 +130,7 @@ cd backend
 pytest
 ```
 
-Las pruebas usan una base de datos SQLite en memoria (no tocan la base de datos real de Neon) y cubren el flujo exitoso completo (crear, consultar, vender, reponer, corregir, listar, editar, eliminar y acceso de empleado) junto con los casos excepcionales de cada regla de negocio.
+Las pruebas usan una base de datos SQLite en memoria (no tocan la base de datos real de Neon) y cubren el flujo exitoso (consultar, vender, reponer, corregir y listar stock) junto con los casos excepcionales de cada regla de negocio.
 
 ## Despliegue
 
@@ -142,7 +140,7 @@ Las pruebas usan una base de datos SQLite en memoria (no tocan la base de datos 
 
 ## Diagrama BPMN
 
-El proceso esta modelado con los flujos de consulta, actualizacion de stock (venta/reposicion/correccion unificadas), listado y CRUD de productos. El archivo se encuentra en `docs/bpmn/`.
+El proceso esta modelado con 3 flujos: consulta, actualizacion de stock (venta/reposicion/correccion unificadas) y listado. El archivo se encuentra en `docs/bpmn/`.
 
 ## Licencia
 
