@@ -74,12 +74,29 @@ function renderizarCatalogo(productos) {
     btnAgregar.textContent = agotado ? "Agotado" : "Agregar al carrito";
     btnAgregar.addEventListener("click", () => {
       render_carrito(agregarAlCarrito(producto));
-      abrirCarrito();
+      animarIconoCarrito();
       mostrarToast(`${producto.nombre} agregado al carrito`, "exito");
     });
 
     gridEl.appendChild(nodo);
   });
+}
+
+/* ===== Animacion del icono de carrito ===== */
+
+function animarIconoCarrito() {
+  const icono = document.getElementById("btn-abrir-carrito");
+  const contador = document.getElementById("contador-carrito");
+  icono.classList.remove("animando");
+  contador.classList.remove("animando");
+  requestAnimationFrame(() => {
+    icono.classList.add("animando");
+    contador.classList.add("animando");
+  });
+  setTimeout(() => {
+    icono.classList.remove("animando");
+    contador.classList.remove("animando");
+  }, 420);
 }
 
 /* ===== Carrito: render y eventos ===== */
@@ -136,6 +153,32 @@ function cerrarCarrito() {
   document.getElementById("overlay").hidden = true;
 }
 
+/* ===== Overlay de confirmacion de compra (check animado) ===== */
+
+function mostrarConfirmacionCompra() {
+  let overlay = document.getElementById("confirmacion-overlay");
+
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "confirmacion-overlay";
+    overlay.className = "confirmacion-overlay";
+    overlay.innerHTML = `
+      <div class="confirmacion-card">
+        <div class="confirmacion-check">
+          <svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6"/></svg>
+        </div>
+        <p class="confirmacion-titulo">¡Compra simulada realizada!</p>
+        <p class="confirmacion-texto">Gracias por tu compra en Mercado VIVA.</p>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", () => overlay.classList.remove("visible"));
+  }
+
+  requestAnimationFrame(() => overlay.classList.add("visible"));
+  setTimeout(() => overlay.classList.remove("visible"), 2200);
+}
+
 /* ===== Checkout simulado ===== */
 
 async function confirmarCompra() {
@@ -157,7 +200,7 @@ async function confirmarCompra() {
     vaciarCarrito();
     render_carrito();
     cerrarCarrito();
-    mostrarToast("Compra simulada realizada con éxito. ¡Gracias por tu compra!", "exito");
+    mostrarConfirmacionCompra();
     cargarCatalogo(); // refresca el stock visible en el catalogo
   } catch (error) {
     mostrarToast(`No se pudo completar la compra: ${error.message}`, "error");
