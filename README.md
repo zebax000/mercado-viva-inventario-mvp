@@ -64,7 +64,8 @@ mercado-viva-inventario-mvp/
 │   ├── cliente.js    # Animaciones y overlay de confirmacion de compra
 │   └── empleado.js   # Logica del panel de empleado (listado, ajuste de stock, alta/edicion/baja de productos)
 └── docs/
-    └── bpmn/         # Diagrama BPMN del proceso (imagen/xml de Bizagi)
+    └── BPMN        # Diagrama BPMN del proceso (imagen/xml de Bizagi)
+    └── Evento evaluativo mercado viva.pdf  # pdf con historias de usuario y definicion del problema
 ```
 
 ## Endpoints de la API

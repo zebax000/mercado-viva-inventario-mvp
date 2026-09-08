@@ -18,8 +18,18 @@ def consultar_producto(db: Session, codigo: str) -> Producto:
     return producto
 
 
-def listar_productos(db: Session) -> list[Producto]:
-    productos = db.query(Producto).all()
+def listar_productos(
+    db: Session,
+    categoria: str | None = None,
+    subcategoria: str | None = None,
+) -> list[Producto]:
+    consulta = db.query(Producto)
+    if categoria:
+        consulta = consulta.filter(Producto.categoria == categoria)
+    if subcategoria:
+        consulta = consulta.filter(Producto.subcategoria == subcategoria)
+
+    productos = consulta.all()
     if not productos:
         raise ErrorDeNegocio("INVENTARIO_VACIO", "No hay productos registrados")
     return productos
@@ -36,6 +46,10 @@ def crear_producto(db: Session, datos: ProductoCreateIn) -> Producto:
         stock=datos.stock,
         precio=datos.precio,
         imagen_url=datos.imagen_url,
+        categoria=datos.categoria,
+        subcategoria=datos.subcategoria,
+        descuento_porcentaje=datos.descuento_porcentaje,
+        dias_descuento=datos.dias_descuento,
     )
     db.add(producto)
     db.commit()
@@ -52,6 +66,14 @@ def actualizar_producto(db: Session, codigo: str, datos: ProductoUpdateIn) -> Pr
         producto.precio = datos.precio
     if datos.imagen_url is not None:
         producto.imagen_url = datos.imagen_url
+    if datos.categoria is not None:
+        producto.categoria = datos.categoria
+    if datos.subcategoria is not None:
+        producto.subcategoria = datos.subcategoria
+    if datos.descuento_porcentaje is not None:
+        producto.descuento_porcentaje = datos.descuento_porcentaje
+    if datos.dias_descuento is not None:
+        producto.dias_descuento = datos.dias_descuento
 
     db.commit()
     db.refresh(producto)

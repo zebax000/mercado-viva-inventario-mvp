@@ -9,6 +9,12 @@ class ProductoOut(BaseModel):
     stock: int
     precio: float
     imagen_url: Optional[str] = None
+    categoria: Optional[str] = None
+    subcategoria: Optional[str] = None
+    descuento_porcentaje: float = 0
+    dias_descuento: Optional[str] = None
+    precio_final: float
+    en_descuento_hoy: bool
 
     class Config:
         from_attributes = True
@@ -21,6 +27,10 @@ class ProductoCreateIn(BaseModel):
     stock: NonNegativeInt = 0
     precio: NonNegativeFloat = 0
     imagen_url: Optional[str] = None
+    categoria: Optional[str] = None
+    subcategoria: Optional[str] = None
+    descuento_porcentaje: NonNegativeFloat = 0
+    dias_descuento: Optional[str] = None
 
 
 class ProductoUpdateIn(BaseModel):
@@ -29,6 +39,10 @@ class ProductoUpdateIn(BaseModel):
     nombre: Optional[str] = None
     precio: Optional[NonNegativeFloat] = None
     imagen_url: Optional[str] = None
+    categoria: Optional[str] = None
+    subcategoria: Optional[str] = None
+    descuento_porcentaje: Optional[NonNegativeFloat] = None
+    dias_descuento: Optional[str] = None
 
 
 class AjusteStockIn(BaseModel):
