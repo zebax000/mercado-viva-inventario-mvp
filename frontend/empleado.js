@@ -23,6 +23,23 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-confirmar-reponer").addEventListener("click", confirmarReposicion);
 });
 
+/* ===== Bloqueo de caracteres invalidos en campos numericos =====
+   input type="number" permite escribir e, E, + y - (notacion cientifica),
+   lo que dejaba el campo invalido y el valor terminaba guardandose como 0. */
+const CAMPOS_NUMERICOS_IDS = ["form-stock", "form-precio", "form-cantidad-reponer"];
+const TECLAS_BLOQUEADAS = ["e", "E", "+", "-"];
+
+document.addEventListener("keydown", (e) => {
+  if (CAMPOS_NUMERICOS_IDS.includes(e.target.id) && TECLAS_BLOQUEADAS.includes(e.key)) {
+    e.preventDefault();
+  }
+});
+
+function limpiarNumero(valor) {
+  const n = Number(valor);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
 /* ===== Acceso ===== */
 
 async function intentarAcceso() {
@@ -135,8 +152,8 @@ async function guardarProducto() {
 
   const codigo = document.getElementById("form-codigo").value.trim();
   const nombre = document.getElementById("form-nombre").value.trim();
-  const stock = Number(document.getElementById("form-stock").value);
-  const precio = Number(document.getElementById("form-precio").value);
+  const stock = limpiarNumero(document.getElementById("form-stock").value);
+  const precio = limpiarNumero(document.getElementById("form-precio").value);
   const imagen_url = document.getElementById("form-imagen").value.trim() || null;
 
   if (!codigo || !nombre) {
@@ -196,7 +213,7 @@ function cerrarModalReponer() {
 
 async function confirmarReposicion() {
   const errorEl = document.getElementById("modal-reponer-error");
-  const cantidad = Number(document.getElementById("form-cantidad-reponer").value);
+  const cantidad = limpiarNumero(document.getElementById("form-cantidad-reponer").value);
 
   if (!cantidad || cantidad <= 0) {
     errorEl.textContent = "Ingresa una cantidad mayor a 0.";
