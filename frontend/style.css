@@ -91,7 +91,15 @@ body {
 .card-producto__img-wrap {
   position: relative; width: 100%; aspect-ratio: 1/1; background: var(--secundario-suave); overflow: hidden;
 }
-.card-producto__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card-producto__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+  background: var(--secundario-suave);
+}
 
 .sello-agotado {
   display: none; position: absolute; top: 14px; right: -30px; transform: rotate(40deg);
@@ -182,4 +190,272 @@ body {
   height: 52px; /* sube este valor hasta que se vea del tamaño correcto */
   width: auto;
   display: block;
+}
+/* ---- Animacion: salto del icono de carrito al agregar producto ---- */
+@keyframes salto-carrito {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.28); }
+  55%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.cart-trigger.animando {
+  animation: salto-carrito 0.4s ease;
+}
+.cart-count.animando {
+  animation: salto-carrito 0.4s ease;
+}
+
+/* ---- Overlay de confirmacion de compra (reemplaza el toast largo) ---- */
+.confirmacion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(42, 36, 34, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.confirmacion-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.confirmacion-card {
+  background: var(--blanco);
+  border-radius: var(--radio);
+  padding: 36px 40px;
+  text-align: center;
+  transform: scale(0.85);
+  transition: transform 0.25s ease;
+  box-shadow: 0 8px 30px rgba(42, 36, 34, 0.18);
+}
+.confirmacion-overlay.visible .confirmacion-card {
+  transform: scale(1);
+}
+
+.confirmacion-check {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--secundario-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+.confirmacion-check svg {
+  stroke: var(--acento);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  width: 28px;
+  height: 28px;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+}
+.confirmacion-overlay.visible .confirmacion-check svg {
+  animation: dibujar-check 0.5s ease 0.15s forwards;
+}
+@keyframes dibujar-check {
+  to { stroke-dashoffset: 0; }
+}
+
+.confirmacion-titulo {
+  font-family: var(--fuente-marca);
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.confirmacion-texto {
+  font-size: 13.5px;
+  color: var(--texto-suave);
+}
+
+/* ============================================================
+   Panel de empleado
+   ============================================================ */
+
+.panel-acceso {
+  max-width: 360px;
+  margin: 80px auto;
+  padding: 32px 28px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  text-align: center;
+}
+.panel-acceso h2 {
+  font-family: var(--fuente-marca);
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+.panel-acceso p {
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin-bottom: 18px;
+}
+.panel-acceso input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 14px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.panel-acceso input:focus { outline: none; border-color: var(--secundario); }
+.panel-acceso .btn-primario { width: 100%; }
+.panel-acceso .error-acceso {
+  color: var(--rojo);
+  font-size: 12.5px;
+  margin-top: 10px;
+  min-height: 16px;
+}
+
+.empleado-wrap { padding: 24px 32px 60px; }
+.empleado-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.empleado-toolbar h1 {
+  font-family: var(--fuente-marca);
+  font-size: 22px;
+}
+
+.btn-primario {
+  border: none;
+  background: var(--acento);
+  color: var(--blanco);
+  font-family: var(--fuente-cuerpo);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 10px 18px;
+  border-radius: var(--radio);
+  cursor: pointer;
+}
+.btn-primario:hover { background: var(--acento-hover); }
+
+.btn-secundario {
+  border: 1px solid var(--borde);
+  background: var(--blanco);
+  color: var(--texto);
+  font-family: var(--fuente-cuerpo);
+  font-weight: 500;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: var(--radio);
+  cursor: pointer;
+}
+.btn-secundario:hover { border-color: var(--secundario); }
+
+.btn-peligro {
+  border: 1px solid var(--rojo);
+  background: var(--blanco);
+  color: var(--rojo);
+  font-family: var(--fuente-cuerpo);
+  font-weight: 500;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: var(--radio);
+  cursor: pointer;
+}
+.btn-peligro:hover { background: #F7E9E7; }
+
+.tabla-productos {
+  width: 100%;
+  table-layout: fixed;
+}
+.tabla-productos th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--borde);
+  color: var(--texto-suave);
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.tabla-productos td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+.tabla-productos tr:last-child td {
+  border-bottom: none;
+}
+.tabla-productos img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  padding: 3px;
+  border-radius: var(--radio);
+  background: var(--secundario-suave);
+}
+.tabla-productos .acciones {
+  white-space: nowrap;
+}
+.tabla-productos .acciones button {
+  margin-right: 6px;
+}
+.tabla-productos .acciones button:last-child {
+  margin-right: 0;
+}
+
+/* ---- Modal generico (crear/editar producto, reponer stock) ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(42, 36, 34, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 45;
+}
+.modal-overlay[hidden] {
+  display: none;
+}
+.modal {
+  background: var(--blanco);
+  border-radius: var(--radio);
+  width: 100%;
+  max-width: 420px;
+  padding: 24px 26px;
+}
+.modal h3 {
+  font-family: var(--fuente-marca);
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+.campo-form { margin-bottom: 14px; }
+.campo-form label {
+  display: block;
+  font-size: 12.5px;
+  color: var(--texto-suave);
+  margin-bottom: 5px;
+}
+.campo-form input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 14px;
+}
+.campo-form input:focus { outline: none; border-color: var(--secundario); }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+.mensaje-error-form {
+  color: var(--rojo);
+  font-size: 12.5px;
+  margin-top: -6px;
+  margin-bottom: 10px;
+  min-height: 14px;
 }
