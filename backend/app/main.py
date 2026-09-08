@@ -28,9 +28,13 @@ def obtener_producto(codigo: str, db: Session = Depends(get_db)):
 
 
 @app.get("/productos", response_model=list[schemas.ProductoOut])
-def obtener_listado(db: Session = Depends(get_db)):
+def obtener_listado(
+    categoria: str | None = None,
+    subcategoria: str | None = None,
+    db: Session = Depends(get_db),
+):
     try:
-        return crud.listar_productos(db)
+        return crud.listar_productos(db, categoria=categoria, subcategoria=subcategoria)
     except crud.ErrorDeNegocio as e:
         raise HTTPException(status_code=404, detail={"error": e.codigo_error, "mensaje": e.mensaje})
 
