@@ -1,0 +1,168 @@
+/* ===== Logica especifica de la vista de cliente (catalogo + carrito) ===== */
+
+let PRODUCTOS_CACHE = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarCatalogo();
+  render_carrito();
+
+  document.getElementById("btn-abrir-carrito").addEventListener("click", abrirCarrito);
+  document.getElementById("btn-cerrar-carrito").addEventListener("click", cerrarCarrito);
+  document.getElementById("overlay").addEventListener("click", cerrarCarrito);
+  document.getElementById("btn-confirmar-compra").addEventListener("click", confirmarCompra);
+  document.getElementById("input-buscar").addEventListener("input", (e) => {
+    filtrarYRenderizarCatalogo(e.target.value);
+  });
+});
+
+/* ===== Catalogo ===== */
+
+async function cargarCatalogo() {
+  const mensajeEl = document.getElementById("catalogo-mensaje");
+  const gridEl = document.getElementById("grid-productos");
+  mensajeEl.hidden = true;
+
+  try {
+    PRODUCTOS_CACHE = await apiFetch("/productos");
+    renderizarCatalogo(PRODUCTOS_CACHE);
+  } catch (error) {
+    gridEl.innerHTML = "";
+    mensajeEl.hidden = false;
+    mensajeEl.textContent = error.codigoError === "INVENTARIO_VACIO"
+      ? "Todavia no hay productos publicados en el catálogo."
+      : `No se pudo cargar el catálogo: ${error.message}`;
+  }
+}
+
+function filtrarYRenderizarCatalogo(texto) {
+  const busqueda = texto.trim().toLowerCase();
+  const filtrados = !busqueda
+    ? PRODUCTOS_CACHE
+    : PRODUCTOS_CACHE.filter((p) =>
+        p.nombre.toLowerCase().includes(busqueda) || p.codigo.toLowerCase().includes(busqueda)
+      );
+  renderizarCatalogo(filtrados);
+}
+
+function renderizarCatalogo(productos) {
+  const gridEl = document.getElementById("grid-productos");
+  const tpl = document.getElementById("tpl-tarjeta-producto");
+  gridEl.innerHTML = "";
+
+  productos.forEach((producto) => {
+    const nodo = tpl.content.cloneNode(true);
+    const card = nodo.querySelector(".card-producto");
+    const img = nodo.querySelector(".card-producto__img");
+    const nombre = nodo.querySelector(".card-producto__nombre");
+    const precio = nodo.querySelector(".card-producto__precio");
+    const stock = nodo.querySelector(".card-producto__stock");
+    const btnAgregar = nodo.querySelector(".btn-agregar");
+
+    img.src = producto.imagen_url || "img/placeholder.png";
+    img.alt = producto.nombre;
+    nombre.textContent = producto.nombre;
+    precio.textContent = formatearPrecio(producto.precio);
+
+    const agotado = producto.stock === 0;
+    const bajo = producto.stock > 0 && producto.stock <= 5;
+
+    stock.textContent = agotado ? "Sin stock" : `Stock: ${producto.stock}`;
+    if (bajo) stock.classList.add("card-producto__stock--bajo");
+    if (agotado) card.classList.add("card-producto--agotado");
+
+    btnAgregar.disabled = agotado;
+    btnAgregar.textContent = agotado ? "Agotado" : "Agregar al carrito";
+    btnAgregar.addEventListener("click", () => {
+      render_carrito(agregarAlCarrito(producto));
+      abrirCarrito();
+      mostrarToast(`${producto.nombre} agregado al carrito`, "exito");
+    });
+
+    gridEl.appendChild(nodo);
+  });
+}
+
+/* ===== Carrito: render y eventos ===== */
+
+function render_carrito(carritoOpcional) {
+  const carrito = carritoOpcional || obtenerCarrito();
+  const listaEl = document.getElementById("lista-carrito");
+  const vacioEl = document.getElementById("carrito-vacio");
+  const totalEl = document.getElementById("carrito-total");
+  const contadorEl = document.getElementById("contador-carrito");
+  const btnConfirmar = document.getElementById("btn-confirmar-compra");
+  const tpl = document.getElementById("tpl-item-carrito");
+
+  listaEl.innerHTML = "";
+  vacioEl.hidden = carrito.length > 0;
+  btnConfirmar.disabled = carrito.length === 0;
+
+  carrito.forEach((item) => {
+    const nodo = tpl.content.cloneNode(true);
+    nodo.querySelector(".item-carrito__img").src = item.imagen_url || "img/placeholder.png";
+    nodo.querySelector(".item-carrito__nombre").textContent = item.nombre;
+    nodo.querySelector(".item-carrito__precio-unit").textContent = formatearPrecio(item.precio);
+    nodo.querySelector(".item-carrito__cantidad-valor").textContent = item.cantidad;
+
+    nodo.querySelector(".btn-restar").addEventListener("click", () => {
+      render_carrito(cambiarCantidad(item.codigo, -1));
+    });
+    nodo.querySelector(".btn-sumar").addEventListener("click", () => {
+      render_carrito(cambiarCantidad(item.codigo, 1));
+    });
+    nodo.querySelector(".btn-quitar").addEventListener("click", () => {
+      render_carrito(quitarDelCarrito(item.codigo));
+    });
+
+    listaEl.appendChild(nodo);
+  });
+
+  const total = totalCarrito(carrito);
+  totalEl.textContent = formatearPrecio(total);
+
+  const totalUnidades = carrito.reduce((acc, i) => acc + i.cantidad, 0);
+  contadorEl.textContent = totalUnidades;
+}
+
+function abrirCarrito() {
+  document.getElementById("panel-carrito").classList.add("abierto");
+  document.getElementById("panel-carrito").setAttribute("aria-hidden", "false");
+  document.getElementById("overlay").hidden = false;
+}
+
+function cerrarCarrito() {
+  document.getElementById("panel-carrito").classList.remove("abierto");
+  document.getElementById("panel-carrito").setAttribute("aria-hidden", "true");
+  document.getElementById("overlay").hidden = true;
+}
+
+/* ===== Checkout simulado ===== */
+
+async function confirmarCompra() {
+  const carrito = obtenerCarrito();
+  if (carrito.length === 0) return;
+
+  const btn = document.getElementById("btn-confirmar-compra");
+  btn.disabled = true;
+  btn.textContent = "Procesando...";
+
+  try {
+    for (const item of carrito) {
+      await apiFetch(`/productos/${item.codigo}/stock/ajuste`, {
+        method: "POST",
+        body: JSON.stringify({ tipo_operacion: "venta", cantidad: item.cantidad }),
+      });
+    }
+
+    vaciarCarrito();
+    render_carrito();
+    cerrarCarrito();
+    mostrarToast("Compra simulada realizada con éxito. ¡Gracias por tu compra!", "exito");
+    cargarCatalogo(); // refresca el stock visible en el catalogo
+  } catch (error) {
+    mostrarToast(`No se pudo completar la compra: ${error.message}`, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Confirmar compra";
+  }
+}
