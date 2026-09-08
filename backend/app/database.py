@@ -13,7 +13,11 @@ if not DATABASE_URL:
         "con el connection string de Neon."
     )
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,   # revisa la conexion antes de usarla; la renueva si Neon ya la cerro
+    pool_recycle=300,     # descarta conexiones cada 5 minutos, antes de que el pooler de Neon las cierre por inactividad
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
