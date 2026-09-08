@@ -1,5 +1,5 @@
-from typing import Literal
-from pydantic import BaseModel, NonNegativeInt
+from typing import Literal, Optional
+from pydantic import BaseModel, NonNegativeInt, NonNegativeFloat
 
 
 class ProductoOut(BaseModel):
@@ -7,15 +7,39 @@ class ProductoOut(BaseModel):
     codigo: str
     nombre: str
     stock: int
+    precio: float
+    imagen_url: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+class ProductoCreateIn(BaseModel):
+    """Lo que el empleado envia para crear un producto nuevo."""
+    codigo: str
+    nombre: str
+    stock: NonNegativeInt = 0
+    precio: NonNegativeFloat = 0
+    imagen_url: Optional[str] = None
+
+
+class ProductoUpdateIn(BaseModel):
+    """Lo que el empleado envia para editar un producto existente.
+    Todos los campos son opcionales: solo se actualiza lo que se envia."""
+    nombre: Optional[str] = None
+    precio: Optional[NonNegativeFloat] = None
+    imagen_url: Optional[str] = None
 
 
 class AjusteStockIn(BaseModel):
     """Lo que el empleado envia para vender, reponer o corregir stock."""
     tipo_operacion: Literal["venta", "reposicion", "correccion"]
     cantidad: NonNegativeInt
+
+
+class EmpleadoAccesoIn(BaseModel):
+    """Codigo de acceso que el empleado ingresa para entrar al panel."""
+    codigo: str
 
 
 class ErrorResponse(BaseModel):

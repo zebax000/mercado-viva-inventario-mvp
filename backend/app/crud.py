@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models import Producto
-from app.schemas import AjusteStockIn
+from app.schemas import AjusteStockIn, ProductoCreateIn, ProductoUpdateIn
 
 
 class ErrorDeNegocio(Exception):
@@ -23,6 +23,45 @@ def listar_productos(db: Session) -> list[Producto]:
     if not productos:
         raise ErrorDeNegocio("INVENTARIO_VACIO", "No hay productos registrados")
     return productos
+
+
+def crear_producto(db: Session, datos: ProductoCreateIn) -> Producto:
+    existe = db.query(Producto).filter(Producto.codigo == datos.codigo).first()
+    if existe is not None:
+        raise ErrorDeNegocio("CODIGO_DUPLICADO", "Ya existe un producto con ese codigo")
+
+    producto = Producto(
+        codigo=datos.codigo,
+        nombre=datos.nombre,
+        stock=datos.stock,
+        precio=datos.precio,
+        imagen_url=datos.imagen_url,
+    )
+    db.add(producto)
+    db.commit()
+    db.refresh(producto)
+    return producto
+
+
+def actualizar_producto(db: Session, codigo: str, datos: ProductoUpdateIn) -> Producto:
+    producto = consultar_producto(db, codigo)
+
+    if datos.nombre is not None:
+        producto.nombre = datos.nombre
+    if datos.precio is not None:
+        producto.precio = datos.precio
+    if datos.imagen_url is not None:
+        producto.imagen_url = datos.imagen_url
+
+    db.commit()
+    db.refresh(producto)
+    return producto
+
+
+def eliminar_producto(db: Session, codigo: str) -> None:
+    producto = consultar_producto(db, codigo)
+    db.delete(producto)
+    db.commit()
 
 
 def ajustar_stock(db: Session, codigo: str, datos: AjusteStockIn) -> Producto:
@@ -48,3 +87,13 @@ def ajustar_stock(db: Session, codigo: str, datos: AjusteStockIn) -> Producto:
     db.commit()
     db.refresh(producto)
     return producto
+
+
+def verificar_codigo_empleado(codigo_ingresado: str, codigo_real: str | None) -> None:
+    if not codigo_real:
+        raise ErrorDeNegocio(
+            "CONFIGURACION_INVALIDA",
+            "No hay codigo de empleado configurado en el servidor",
+        )
+    if codigo_ingresado != codigo_real:
+        raise ErrorDeNegocio("CODIGO_INCORRECTO", "El codigo de acceso no es valido")
