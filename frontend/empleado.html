@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercado VIVA — Panel de empleado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <img src="img/logo-mercado-viva-clean.png" alt="Mercado VIVA" class="brand__logo">
+  </div>
+  <nav class="header-actions">
+    <a href="index.html" class="acceso-empleado">Volver al catálogo</a>
+  </nav>
+</header>
+
+<!-- ===== Puerta de acceso ===== -->
+<section id="panel-acceso" class="panel-acceso">
+  <h2>Acceso empleado</h2>
+  <p>Ingresa el código de acceso para entrar al panel.</p>
+  <input type="password" id="input-codigo-acceso" placeholder="Código de acceso">
+  <button id="btn-entrar" class="btn-primario" type="button">Entrar</button>
+  <p id="error-acceso" class="error-acceso"></p>
+</section>
+
+<!-- ===== Panel de empleado (oculto hasta validar el codigo) ===== -->
+<main id="panel-empleado" class="empleado-wrap" hidden>
+  <div class="empleado-toolbar">
+    <h1>Inventario</h1>
+    <button id="btn-nuevo-producto" class="btn-primario" type="button">+ Agregar producto</button>
+  </div>
+
+  <div id="empleado-mensaje" class="catalogo-mensaje" hidden></div>
+
+  <table class="tabla-productos">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Stock</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-productos-body"></tbody>
+  </table>
+</main>
+
+<!-- ===== Modal: crear / editar producto ===== -->
+<div id="modal-producto" class="modal-overlay" hidden>
+  <div class="modal">
+    <h3 id="modal-producto-titulo">Agregar producto</h3>
+    <p id="modal-producto-error" class="mensaje-error-form"></p>
+
+    <div class="campo-form">
+      <label for="form-codigo">Código</label>
+      <input type="text" id="form-codigo">
+    </div>
+    <div class="campo-form">
+      <label for="form-nombre">Nombre</label>
+      <input type="text" id="form-nombre">
+    </div>
+    <div class="campo-form">
+      <label for="form-stock">Stock inicial</label>
+      <input type="number" id="form-stock" min="0" step="1">
+    </div>
+    <div class="campo-form">
+      <label for="form-precio">Precio</label>
+      <input type="number" id="form-precio" min="0" step="1">
+    </div>
+    <div class="campo-form">
+      <label for="form-imagen">URL de la imagen (raw de GitHub)</label>
+      <input type="text" id="form-imagen" placeholder="https://raw.githubusercontent.com/...">
+    </div>
+
+    <div class="modal-footer">
+      <button id="btn-cancelar-producto" class="btn-secundario" type="button">Cancelar</button>
+      <button id="btn-guardar-producto" class="btn-primario" type="button">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: reponer stock ===== -->
+<div id="modal-reponer" class="modal-overlay" hidden>
+  <div class="modal">
+    <h3>Reponer stock</h3>
+    <p id="reponer-nombre" style="font-size:13.5px; color: var(--texto-suave); margin-bottom: 14px;"></p>
+    <p id="modal-reponer-error" class="mensaje-error-form"></p>
+    <div class="campo-form">
+      <label for="form-cantidad-reponer">Cantidad a agregar</label>
+      <input type="number" id="form-cantidad-reponer" min="1" step="1">
+    </div>
+    <div class="modal-footer">
+      <button id="btn-cancelar-reponer" class="btn-secundario" type="button">Cancelar</button>
+      <button id="btn-confirmar-reponer" class="btn-primario" type="button">Reponer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="script.js"></script>
+<script src="empleado.js"></script>
+</body>
+</html>
