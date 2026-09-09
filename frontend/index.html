@@ -39,6 +39,20 @@
   >
 </div>
 
+<div id="categorias-bar" style="display:flex; gap:8px; overflow-x:auto; padding: 14px 32px 0;">
+    <button type="button" class="btn-categoria" data-categoria="" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🛒 Todos</button>
+    <button type="button" class="btn-categoria" data-categoria="Frutas y Verduras" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🥦 Frutas y Verduras</button>
+    <button type="button" class="btn-categoria" data-categoria="Carnes" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🥩 Carnes</button>
+    <button type="button" class="btn-categoria" data-categoria="Lácteos" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🥛 Lácteos</button>
+    <button type="button" class="btn-categoria" data-categoria="Despensa" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🥫 Despensa</button>
+    <button type="button" class="btn-categoria" data-categoria="Bebidas" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🥤 Bebidas</button>
+    <button type="button" class="btn-categoria" data-categoria="Panadería" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🍞 Panadería</button>
+    <button type="button" class="btn-categoria" data-categoria="Congelados" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🧊 Congelados</button>
+    <button type="button" class="btn-categoria" data-categoria="Aseo y Limpieza" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🧼 Aseo y Limpieza</button>
+    <button type="button" class="btn-categoria" data-categoria="Cuidado Personal" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">🧴 Cuidado Personal</button>
+    <button type="button" class="btn-categoria" data-categoria="Otros" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;">📦 Otros</button>
+</div>
+
 <main class="catalogo-wrap">
   <div id="catalogo-mensaje" class="catalogo-mensaje" hidden></div>
   <div id="grid-productos" class="grid-productos"></div>
@@ -49,11 +63,15 @@
     <div class="card-producto__img-wrap">
       <img class="card-producto__img" src="" alt="">
       <span class="sello-agotado">Agotado</span>
+      <span class="sello-descuento" style="display:none; position:absolute; top:10px; left:10px; background:var(--acento); color:var(--blanco); font-size:11px; font-weight:600; padding:3px 8px; border-radius:4px;"></span>
     </div>
     <div class="card-producto__body">
       <p class="card-producto__nombre"></p>
       <div class="card-producto__linea-inferior">
-        <span class="card-producto__precio"></span>
+        <span style="display:flex; align-items:baseline; gap:6px;">
+          <span class="card-producto__precio-original" style="display:none; text-decoration:line-through; color: var(--texto-suave); font-size:12.5px;"></span>
+          <span class="card-producto__precio"></span>
+        </span>
         <span class="card-producto__stock"></span>
       </div>
       <button class="btn-agregar" type="button">Agregar al carrito</button>
