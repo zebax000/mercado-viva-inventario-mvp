@@ -74,9 +74,20 @@ class UsuarioOut(BaseModel):
     Nunca se incluye la contraseña (ni siquiera el hash) en la respuesta."""
     usuario: str
     rol: str
+    nombre_completo: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+class DatosEntregaIn(BaseModel):
+    """Datos minimos de contacto/entrega que el cliente guarda en su cuenta
+    para no tener que rellenarlos de nuevo en compras futuras."""
+    nombre_completo: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
 
 
 class ErrorResponse(BaseModel):
