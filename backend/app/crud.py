@@ -6,7 +6,14 @@ import os
 from sqlalchemy.orm import Session
 
 from app.models import Producto, Usuario
-from app.schemas import AjusteStockIn, ProductoCreateIn, ProductoUpdateIn, UsuarioLoginIn, UsuarioRegistroIn
+from app.schemas import (
+    AjusteStockIn,
+    DatosEntregaIn,
+    ProductoCreateIn,
+    ProductoUpdateIn,
+    UsuarioLoginIn,
+    UsuarioRegistroIn,
+)
 
 
 class ErrorDeNegocio(Exception):
@@ -191,4 +198,23 @@ def iniciar_sesion(db: Session, datos: UsuarioLoginIn) -> Usuario:
     usuario = db.query(Usuario).filter(Usuario.usuario == datos.usuario).first()
     if usuario is None or not verificar_password(datos.password, usuario.password):
         raise ErrorDeNegocio("CREDENCIALES_INVALIDAS", "Usuario o contrasena incorrectos")
+    return usuario
+
+
+def actualizar_datos_entrega(db: Session, usuario_nombre: str, datos: DatosEntregaIn) -> Usuario:
+    """Guarda o actualiza el nombre, telefono y direccion de un cliente ya
+    autenticado, para que no tenga que rellenarlos de nuevo en su siguiente compra."""
+    usuario = db.query(Usuario).filter(Usuario.usuario == usuario_nombre).first()
+    if usuario is None:
+        raise ErrorDeNegocio("USUARIO_NO_ENCONTRADO", "El usuario no existe")
+
+    if datos.nombre_completo is not None:
+        usuario.nombre_completo = datos.nombre_completo
+    if datos.telefono is not None:
+        usuario.telefono = datos.telefono
+    if datos.direccion is not None:
+        usuario.direccion = datos.direccion
+
+    db.commit()
+    db.refresh(usuario)
     return usuario
