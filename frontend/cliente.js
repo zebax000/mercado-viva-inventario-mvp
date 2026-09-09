@@ -21,6 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
       actualizarEstiloBotonesCategoria();
       aplicarFiltrosYRenderizar();
     });
+
+    const tooltip = boton.parentElement.querySelector(".tooltip-categoria");
+    if (tooltip) {
+      boton.addEventListener("mouseenter", () => { tooltip.style.display = "block"; });
+      boton.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+    }
   });
   actualizarEstiloBotonesCategoria();
 });
