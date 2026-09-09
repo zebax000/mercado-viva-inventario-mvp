@@ -44,19 +44,19 @@ function guardarCarrito(carrito) {
   localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
 }
 
-function agregarAlCarrito(producto) {
+function agregarAlCarrito(producto, cantidad = 1) {
   const carrito = obtenerCarrito();
   const existente = carrito.find((item) => item.codigo === producto.codigo);
 
   if (existente) {
-    existente.cantidad += 1;
+    existente.cantidad += cantidad;
   } else {
     carrito.push({
       codigo: producto.codigo,
       nombre: producto.nombre,
       precio: producto.precio,
       imagen_url: producto.imagen_url,
-      cantidad: 1,
+      cantidad: cantidad,
     });
   }
 
