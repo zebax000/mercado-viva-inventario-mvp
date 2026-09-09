@@ -193,9 +193,9 @@ body {
 }
 /* ---- Animacion: salto del icono de carrito al agregar producto ---- */
 @keyframes salto-carrito {
-  0%   { transform: scale(1); }
-  30%  { transform: scale(1.28); }
-  55%  { transform: scale(0.92); }
+  0% { transform: scale(1); }
+  30% { transform: scale(1.28); }
+  55% { transform: scale(0.92); }
   100% { transform: scale(1); }
 }
 .cart-trigger.animando {
@@ -276,8 +276,8 @@ body {
 }
 
 /* ============================================================
-   Panel de empleado
-   ============================================================ */
+Panel de empleado
+============================================================ */
 
 .panel-acceso {
   max-width: 360px;
@@ -458,4 +458,42 @@ body {
   margin-top: -6px;
   margin-bottom: 10px;
   min-height: 14px;
+}
+
+/* ---- Formulario de checkout: datos de entrega dentro del carrito ---- */
+.datos-entrega {
+  padding: 4px 0 14px;
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: 14px;
+}
+.opciones-entrega {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.opcion-entrega {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--texto);
+  cursor: pointer;
+}
+.opcion-entrega input[type="radio"] {
+  accent-color: var(--acento);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.resumen-costos {
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+.resumen-linea {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--texto-suave);
+  padding: 2px 0;
 }
