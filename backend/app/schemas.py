@@ -52,8 +52,31 @@ class AjusteStockIn(BaseModel):
 
 
 class EmpleadoAccesoIn(BaseModel):
-    """Codigo de acceso que el empleado ingresa para entrar al panel."""
+    """Codigo de acceso que el empleado ingresa para entrar al panel (sistema anterior)."""
     codigo: str
+
+
+class UsuarioRegistroIn(BaseModel):
+    """Datos que un cliente nuevo envia para crear su cuenta.
+    No incluye 'rol' a proposito: siempre se crea como cliente, nunca como empleado."""
+    usuario: str
+    password: str
+
+
+class UsuarioLoginIn(BaseModel):
+    """Datos que cualquier usuario (cliente o empleado) envia para iniciar sesion."""
+    usuario: str
+    password: str
+
+
+class UsuarioOut(BaseModel):
+    """Lo que la API devuelve tras un login o registro exitoso.
+    Nunca se incluye la contraseña (ni siquiera el hash) en la respuesta."""
+    usuario: str
+    rol: str
+
+    class Config:
+        from_attributes = True
 
 
 class ErrorResponse(BaseModel):

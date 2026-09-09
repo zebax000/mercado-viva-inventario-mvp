@@ -141,7 +141,7 @@ Las pruebas usan una base de datos SQLite en memoria (no tocan la base de datos 
 
 ## Diagrama BPMN
 
-El proceso esta modelado con 3 flujos: consulta, actualizacion de stock (venta/reposicion/correccion unificadas) y listado. El archivo se encuentra en `docs/bpmn/`.
+El proceso esta modelado con 3 flujos: consulta, actualizacion de stock (venta/reposicion/correccion unificadas) y listado. El archivo se encuentra en `docs/`.
 
 ## Licencia
 

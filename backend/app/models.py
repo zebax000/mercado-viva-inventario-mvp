@@ -43,3 +43,22 @@ class Producto(Base):
         if self.en_descuento_hoy:
             return round(precio_base * (1 - float(self.descuento_porcentaje) / 100), 2)
         return precio_base
+
+
+class Usuario(Base):
+    """
+    Cuenta de acceso al sistema (clientes y empleado).
+
+    'rol' es la pieza clave: distingue entre un cliente normal (solo puede comprar)
+    y el empleado (que ademas puede administrar el inventario). El endpoint de
+    registro publico SIEMPRE crea cuentas con rol "cliente" -- el rol "empleado"
+    no se puede pedir desde un formulario, solo se asigna manualmente en la base
+    de datos, para que nadie pueda auto-otorgarse permisos de administrador.
+    """
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    usuario = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)  # nunca texto plano: siempre el hash (ver crud.py)
+    rol = Column(String, nullable=False, default="cliente")
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
