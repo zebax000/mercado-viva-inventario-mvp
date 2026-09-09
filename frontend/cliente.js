@@ -134,16 +134,26 @@ function renderizarCatalogo(productos) {
       btnSumarCard.disabled = true;
     }
 
+    const textoBaseBoton = agotado ? "Agotado" : "Agregar al carrito";
     btnAgregar.disabled = agotado;
-    btnAgregar.textContent = agotado ? "Agotado" : "Agregar al carrito";
+    btnAgregar.textContent = textoBaseBoton;
     btnAgregar.addEventListener("click", () => {
       const productoParaCarrito = {
         ...producto,
         precio: producto.en_descuento_hoy ? producto.precio_final : producto.precio,
       };
-      render_carrito(agregarAlCarrito(productoParaCarrito, cantidadElegida));
+      const cantidadAgregada = cantidadElegida;
+      render_carrito(agregarAlCarrito(productoParaCarrito, cantidadAgregada));
       animarIconoCarrito();
-      mostrarToast(`${cantidadElegida} x ${producto.nombre} agregado al carrito`, "exito");
+
+      btnAgregar.textContent = `✓ ${cantidadAgregada} agregado${cantidadAgregada > 1 ? "s" : ""}`;
+      btnAgregar.disabled = true;
+      clearTimeout(btnAgregar._resetTimeout);
+      btnAgregar._resetTimeout = setTimeout(() => {
+        btnAgregar.textContent = textoBaseBoton;
+        btnAgregar.disabled = agotado;
+      }, 1300);
+
       cantidadElegida = 1;
       cantidadValorCard.textContent = cantidadElegida;
     });
