@@ -1,6 +1,6 @@
 /* ===== Configuracion y funciones compartidas entre cliente.js y empleado.js ===== */
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://mercado-viva-inventario-mvp.onrender.com";
 
 /**
  * Hace una peticion a la API y normaliza los errores.
