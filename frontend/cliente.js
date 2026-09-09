@@ -1,6 +1,7 @@
 /* ===== Logica especifica de la vista de cliente (catalogo + carrito) ===== */
 
 let PRODUCTOS_CACHE = [];
+let CATEGORIA_ACTIVA = "";
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarCatalogo();
@@ -10,9 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-cerrar-carrito").addEventListener("click", cerrarCarrito);
   document.getElementById("overlay").addEventListener("click", cerrarCarrito);
   document.getElementById("btn-confirmar-compra").addEventListener("click", confirmarCompra);
-  document.getElementById("input-buscar").addEventListener("input", (e) => {
-    filtrarYRenderizarCatalogo(e.target.value);
+  document.getElementById("input-buscar").addEventListener("input", () => {
+    aplicarFiltrosYRenderizar();
   });
+
+  document.querySelectorAll("#categorias-bar .btn-categoria").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      CATEGORIA_ACTIVA = boton.dataset.categoria;
+      actualizarEstiloBotonesCategoria();
+      aplicarFiltrosYRenderizar();
+    });
+  });
+  actualizarEstiloBotonesCategoria();
 });
 
 /* ===== Catalogo ===== */
@@ -24,7 +34,7 @@ async function cargarCatalogo() {
 
   try {
     PRODUCTOS_CACHE = await apiFetch("/productos");
-    renderizarCatalogo(PRODUCTOS_CACHE);
+    aplicarFiltrosYRenderizar();
   } catch (error) {
     gridEl.innerHTML = "";
     mensajeEl.hidden = false;
@@ -34,13 +44,26 @@ async function cargarCatalogo() {
   }
 }
 
-function filtrarYRenderizarCatalogo(texto) {
-  const busqueda = texto.trim().toLowerCase();
-  const filtrados = !busqueda
-    ? PRODUCTOS_CACHE
-    : PRODUCTOS_CACHE.filter((p) =>
-        p.nombre.toLowerCase().includes(busqueda) || p.codigo.toLowerCase().includes(busqueda)
-      );
+function actualizarEstiloBotonesCategoria() {
+  document.querySelectorAll("#categorias-bar .btn-categoria").forEach((boton) => {
+    const activo = boton.dataset.categoria === CATEGORIA_ACTIVA;
+    boton.style.background = activo ? "var(--acento)" : "var(--blanco)";
+    boton.style.color = activo ? "var(--blanco)" : "var(--texto)";
+    boton.style.borderColor = activo ? "var(--acento)" : "var(--borde)";
+  });
+}
+
+function aplicarFiltrosYRenderizar() {
+  const busqueda = document.getElementById("input-buscar").value.trim().toLowerCase();
+
+  const filtrados = PRODUCTOS_CACHE.filter((p) => {
+    const coincideTexto = !busqueda
+      || p.nombre.toLowerCase().includes(busqueda)
+      || p.codigo.toLowerCase().includes(busqueda);
+    const coincideCategoria = !CATEGORIA_ACTIVA || p.categoria === CATEGORIA_ACTIVA;
+    return coincideTexto && coincideCategoria;
+  });
+
   renderizarCatalogo(filtrados);
 }
 
@@ -55,13 +78,26 @@ function renderizarCatalogo(productos) {
     const img = nodo.querySelector(".card-producto__img");
     const nombre = nodo.querySelector(".card-producto__nombre");
     const precio = nodo.querySelector(".card-producto__precio");
+    const precioOriginal = nodo.querySelector(".card-producto__precio-original");
+    const selloDescuento = nodo.querySelector(".sello-descuento");
     const stock = nodo.querySelector(".card-producto__stock");
     const btnAgregar = nodo.querySelector(".btn-agregar");
 
     img.src = producto.imagen_url || "img/placeholder.png";
     img.alt = producto.nombre;
     nombre.textContent = producto.nombre;
-    precio.textContent = formatearPrecio(producto.precio);
+
+    if (producto.en_descuento_hoy) {
+      precio.textContent = formatearPrecio(producto.precio_final);
+      precioOriginal.textContent = formatearPrecio(producto.precio);
+      precioOriginal.style.display = "inline";
+      selloDescuento.textContent = `-${Math.round(producto.descuento_porcentaje)}%`;
+      selloDescuento.style.display = "inline-block";
+    } else {
+      precio.textContent = formatearPrecio(producto.precio);
+      precioOriginal.style.display = "none";
+      selloDescuento.style.display = "none";
+    }
 
     const agotado = producto.stock === 0;
     const bajo = producto.stock > 0 && producto.stock <= 5;
@@ -73,7 +109,11 @@ function renderizarCatalogo(productos) {
     btnAgregar.disabled = agotado;
     btnAgregar.textContent = agotado ? "Agotado" : "Agregar al carrito";
     btnAgregar.addEventListener("click", () => {
-      render_carrito(agregarAlCarrito(producto));
+      const productoParaCarrito = {
+        ...producto,
+        precio: producto.en_descuento_hoy ? producto.precio_final : producto.precio,
+      };
+      render_carrito(agregarAlCarrito(productoParaCarrito));
       animarIconoCarrito();
       mostrarToast(`${producto.nombre} agregado al carrito`, "exito");
     });
