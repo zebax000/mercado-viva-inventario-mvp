@@ -94,9 +94,21 @@ def registrar_usuario(datos: schemas.UsuarioRegistroIn, db: Session = Depends(ge
 
 @app.post("/usuarios/login", response_model=schemas.UsuarioOut)
 def iniciar_sesion(datos: schemas.UsuarioLoginIn, db: Session = Depends(get_db)):
-    """Valida usuario+contrasena y devuelve el rol (cliente o empleado) para que
-    el frontend decida que mostrar."""
+    """Valida usuario+contrasena y devuelve el rol (cliente o empleado), junto con
+    los datos de entrega guardados (si existen), para que el frontend decida
+    que mostrar y pueda precargar el formulario de checkout."""
     try:
         return crud.iniciar_sesion(db, datos)
     except crud.ErrorDeNegocio as e:
         raise HTTPException(status_code=401, detail={"error": e.codigo_error, "mensaje": e.mensaje})
+
+
+@app.put("/usuarios/{usuario}/datos-entrega", response_model=schemas.UsuarioOut)
+def actualizar_datos_entrega(usuario: str, datos: schemas.DatosEntregaIn, db: Session = Depends(get_db)):
+    """Guarda o actualiza el nombre, telefono y direccion de un cliente, para
+    que no tenga que volver a escribirlos en su siguiente compra."""
+    try:
+        return crud.actualizar_datos_entrega(db, usuario, datos)
+    except crud.ErrorDeNegocio as e:
+        status = 404 if e.codigo_error == "USUARIO_NO_ENCONTRADO" else 400
+        raise HTTPException(status_code=status, detail={"error": e.codigo_error, "mensaje": e.mensaje})

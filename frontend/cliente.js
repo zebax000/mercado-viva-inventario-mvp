@@ -3,8 +3,13 @@
 let PRODUCTOS_CACHE = [];
 let CATEGORIA_ACTIVA = "";
 
+const UMBRAL_ENVIO_GRATIS = 30000;
+const COSTO_ENVIO = 5000;
+const DATOS_ENTREGA_KEY = "mercadoviva_datos_entrega";
+
 document.addEventListener("DOMContentLoaded", () => {
   cargarCatalogo();
+  cargarDatosEntregaGuardados();
   render_carrito();
 
   document.getElementById("btn-abrir-carrito").addEventListener("click", abrirCarrito);
@@ -13,6 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-confirmar-compra").addEventListener("click", confirmarCompra);
   document.getElementById("input-buscar").addEventListener("input", () => {
     aplicarFiltrosYRenderizar();
+  });
+
+  document.querySelectorAll('input[name="tipo-entrega"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      actualizarVisibilidadDireccion();
+      render_carrito();
+    });
   });
 
   document.querySelectorAll("#categorias-bar .btn-categoria").forEach((boton) => {
@@ -182,12 +194,69 @@ function animarIconoCarrito() {
   }, 420);
 }
 
+/* ===== Envio: calculo segun subtotal y tipo de entrega ===== */
+
+function obtenerTipoEntregaSeleccionado() {
+  const radio = document.querySelector('input[name="tipo-entrega"]:checked');
+  return radio ? radio.value : "recoleccion";
+}
+
+function actualizarVisibilidadDireccion() {
+  const esDomicilio = obtenerTipoEntregaSeleccionado() === "domicilio";
+  document.getElementById("campo-direccion-entrega").hidden = !esDomicilio;
+}
+
+function calcularCostoEnvio(subtotal, tipoEntrega) {
+  if (tipoEntrega !== "domicilio") return 0;
+  return subtotal < UMBRAL_ENVIO_GRATIS ? COSTO_ENVIO : 0;
+}
+
+/* ===== Datos de entrega: precarga y guardado (sesion o localStorage) ===== */
+
+function cargarDatosEntregaGuardados() {
+  const sesion = obtenerSesion();
+  if (sesion && (sesion.nombre_completo || sesion.telefono || sesion.direccion)) {
+    aplicarDatosEntregaAlFormulario(sesion);
+    return;
+  }
+  try {
+    const guardados = JSON.parse(localStorage.getItem(DATOS_ENTREGA_KEY));
+    if (guardados) aplicarDatosEntregaAlFormulario(guardados);
+  } catch {
+    /* sin datos guardados, se deja el formulario vacio */
+  }
+}
+
+function aplicarDatosEntregaAlFormulario(datos) {
+  if (datos.nombre_completo) document.getElementById("input-nombre-entrega").value = datos.nombre_completo;
+  if (datos.telefono) document.getElementById("input-telefono-entrega").value = datos.telefono;
+  if (datos.direccion) document.getElementById("input-direccion-entrega").value = datos.direccion;
+}
+
+async function guardarDatosEntrega(datos) {
+  const sesion = obtenerSesion();
+  if (sesion) {
+    try {
+      await apiFetch(`/usuarios/${encodeURIComponent(sesion.usuario)}/datos-entrega`, {
+        method: "PUT",
+        body: JSON.stringify(datos),
+      });
+    } catch {
+      /* si falla el guardado remoto, no interrumpe la compra */
+    }
+  } else {
+    localStorage.setItem(DATOS_ENTREGA_KEY, JSON.stringify(datos));
+  }
+}
+
 /* ===== Carrito: render y eventos ===== */
 
 function render_carrito(carritoOpcional) {
   const carrito = carritoOpcional || obtenerCarrito();
   const listaEl = document.getElementById("lista-carrito");
   const vacioEl = document.getElementById("carrito-vacio");
+  const subtotalEl = document.getElementById("carrito-subtotal");
+  const envioEl = document.getElementById("carrito-envio");
   const totalEl = document.getElementById("carrito-total");
   const contadorEl = document.getElementById("contador-carrito");
   const btnConfirmar = document.getElementById("btn-confirmar-compra");
@@ -217,7 +286,13 @@ function render_carrito(carritoOpcional) {
     listaEl.appendChild(nodo);
   });
 
-  const total = totalCarrito(carrito);
+  const subtotal = totalCarrito(carrito);
+  const tipoEntrega = obtenerTipoEntregaSeleccionado();
+  const costoEnvio = calcularCostoEnvio(subtotal, tipoEntrega);
+  const total = subtotal + costoEnvio;
+
+  subtotalEl.textContent = formatearPrecio(subtotal);
+  envioEl.textContent = costoEnvio > 0 ? formatearPrecio(costoEnvio) : "Gratis";
   totalEl.textContent = formatearPrecio(total);
 
   const totalUnidades = carrito.reduce((acc, i) => acc + i.cantidad, 0);
@@ -268,6 +343,23 @@ async function confirmarCompra() {
   const carrito = obtenerCarrito();
   if (carrito.length === 0) return;
 
+  const errorEl = document.getElementById("error-checkout");
+  errorEl.textContent = "";
+
+  const nombreCompleto = document.getElementById("input-nombre-entrega").value.trim();
+  const telefono = document.getElementById("input-telefono-entrega").value.trim();
+  const tipoEntrega = obtenerTipoEntregaSeleccionado();
+  const direccion = document.getElementById("input-direccion-entrega").value.trim();
+
+  if (!nombreCompleto || !telefono) {
+    errorEl.textContent = "Nombre y teléfono son obligatorios.";
+    return;
+  }
+  if (tipoEntrega === "domicilio" && !direccion) {
+    errorEl.textContent = "Ingresa la dirección para el envío a domicilio.";
+    return;
+  }
+
   const btn = document.getElementById("btn-confirmar-compra");
   btn.disabled = true;
   btn.textContent = "Procesando...";
@@ -279,6 +371,12 @@ async function confirmarCompra() {
         body: JSON.stringify({ tipo_operacion: "venta", cantidad: item.cantidad }),
       });
     }
+
+    await guardarDatosEntrega({
+      nombre_completo: nombreCompleto,
+      telefono,
+      direccion: tipoEntrega === "domicilio" ? direccion : "",
+    });
 
     vaciarCarrito();
     render_carrito();
@@ -309,6 +407,7 @@ function obtenerSesion() {
 function guardarSesion(sesion) {
   sessionStorage.setItem(SESION_KEY, JSON.stringify(sesion));
   actualizarUISesion();
+  aplicarDatosEntregaAlFormulario(sesion);
 }
 
 function cerrarSesion() {
@@ -381,7 +480,7 @@ async function enviarFormularioCuenta(evento) {
       method: "POST",
       body: JSON.stringify({ usuario, password }),
     });
-    guardarSesion(resultado); // { usuario, rol }
+    guardarSesion(resultado); // { usuario, rol, nombre_completo, telefono, direccion }
     cerrarModalCuenta();
     mostrarToast(
       MODO_MODAL_CUENTA === "login" ? `Bienvenido, ${resultado.usuario}` : "Cuenta creada con éxito",
