@@ -11,22 +11,22 @@
 </head>
 <body>
 
-<header class="site-header" style="padding-bottom:8px;">
+<header class="site-header" style="align-items:center; padding-bottom:8px;">
     <div class="brand">
   <img src="img/logo-mercado-viva-clean.png" alt="Mercado VIVA" class="brand__logo">
     </div>
 
-  <div style="flex:1; display:flex; justify-content:center; padding: 0 24px;">
+  <div style="flex:1; display:flex; justify-content:center; align-items:center; padding: 0 24px;">
     <input
       type="text"
       id="input-buscar"
       class="buscador-input"
       placeholder="Buscar por nombre o código de producto..."
-      style="max-width:420px;"
+      style="max-width:460px; padding:13px 18px; font-size:15px;"
     >
   </div>
 
-  <nav class="header-actions">
+  <nav class="header-actions" style="align-items:center;">
     <button id="btn-abrir-carrito" class="cart-trigger" aria-label="Abrir carrito">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
         <path d="M3 4h2l2.4 12.4A2 2 0 0 0 9.36 18H18a2 2 0 0 0 1.96-1.6L21.5 8H6.2"/>
@@ -40,7 +40,7 @@
   </nav>
 </header>
 
-<div id="categorias-bar" style="display:flex; justify-content:center; gap:12px; overflow-x:auto; padding: 8px 32px 12px;">
+<div id="categorias-bar" style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; padding: 8px 32px 12px;">
     <div style="position:relative;">
       <button type="button" class="btn-categoria" data-categoria="" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg> Todos</button>
       
