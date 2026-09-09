@@ -7,6 +7,12 @@ const UMBRAL_ENVIO_GRATIS = 30000;
 const COSTO_ENVIO = 5000;
 const DATOS_ENTREGA_KEY = "mercadoviva_datos_entrega";
 
+const METODOS_PAGO_LABEL = {
+  efectivo: "Efectivo",
+  tarjeta: "Tarjeta débito/crédito",
+  transferencia: "Transferencia bancaria",
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   cargarCatalogo();
   cargarDatosEntregaGuardados();
@@ -313,25 +319,27 @@ function cerrarCarrito() {
 
 /* ===== Overlay de confirmacion de compra (check animado) ===== */
 
-function mostrarConfirmacionCompra() {
+function mostrarConfirmacionCompra(metodoPagoTexto) {
   let overlay = document.getElementById("confirmacion-overlay");
 
   if (!overlay) {
     overlay = document.createElement("div");
     overlay.id = "confirmacion-overlay";
     overlay.className = "confirmacion-overlay";
-    overlay.innerHTML = `
-      <div class="confirmacion-card">
-        <div class="confirmacion-check">
-          <svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6"/></svg>
-        </div>
-        <p class="confirmacion-titulo">¡Compra simulada realizada!</p>
-        <p class="confirmacion-texto">Gracias por tu compra en Mercado VIVA.</p>
-      </div>
-    `;
     document.body.appendChild(overlay);
     overlay.addEventListener("click", () => overlay.classList.remove("visible"));
   }
+
+  overlay.innerHTML = `
+    <div class="confirmacion-card">
+      <div class="confirmacion-check">
+        <svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6"/></svg>
+      </div>
+      <p class="confirmacion-titulo">¡Compra simulada realizada!</p>
+      <p class="confirmacion-texto">Gracias por tu compra en Mercado VIVA.</p>
+      ${metodoPagoTexto ? `<p class="confirmacion-texto">Método de pago: ${metodoPagoTexto}</p>` : ""}
+    </div>
+  `;
 
   requestAnimationFrame(() => overlay.classList.add("visible"));
   setTimeout(() => overlay.classList.remove("visible"), 2200);
@@ -350,6 +358,7 @@ async function confirmarCompra() {
   const telefono = document.getElementById("input-telefono-entrega").value.trim();
   const tipoEntrega = obtenerTipoEntregaSeleccionado();
   const direccion = document.getElementById("input-direccion-entrega").value.trim();
+  const metodoPago = document.getElementById("select-metodo-pago").value;
 
   if (!nombreCompleto || !telefono) {
     errorEl.textContent = "Nombre y teléfono son obligatorios.";
@@ -357,6 +366,10 @@ async function confirmarCompra() {
   }
   if (tipoEntrega === "domicilio" && !direccion) {
     errorEl.textContent = "Ingresa la dirección para el envío a domicilio.";
+    return;
+  }
+  if (!metodoPago) {
+    errorEl.textContent = "Selecciona un método de pago.";
     return;
   }
 
@@ -381,7 +394,8 @@ async function confirmarCompra() {
     vaciarCarrito();
     render_carrito();
     cerrarCarrito();
-    mostrarConfirmacionCompra();
+    mostrarConfirmacionCompra(METODOS_PAGO_LABEL[metodoPago] || "");
+    document.getElementById("select-metodo-pago").selectedIndex = 0;
     cargarCatalogo(); // refresca el stock visible en el catalogo
   } catch (error) {
     mostrarToast(`No se pudo completar la compra: ${error.message}`, "error");
