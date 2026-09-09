@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 
-DIAS_SEMANA = ["LU", "MA", "MI", "JU", "VI", "SA", "DO"]
+DIAS_SEMANA = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
 
 
 class Producto(Base):
@@ -20,7 +20,7 @@ class Producto(Base):
     categoria = Column(String, nullable=True, index=True)
     subcategoria = Column(String, nullable=True, index=True)
     descuento_porcentaje = Column(Numeric(5, 2), nullable=False, default=0)
-    dias_descuento = Column(String, nullable=True)  # CSV de codigos: "LU,MA,MI,JU,VI,SA,DO"
+    dias_descuento = Column(String, nullable=True)  # CSV de nombres de dia: "martes,jueves"
     actualizado_en = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -32,7 +32,7 @@ class Producto(Base):
         """True si hoy es uno de los dias configurados y el descuento es mayor a 0."""
         if not self.dias_descuento or not self.descuento_porcentaje:
             return False
-        dias_activos = [d.strip().upper() for d in self.dias_descuento.split(",") if d.strip()]
+        dias_activos = [d.strip().lower() for d in self.dias_descuento.split(",") if d.strip()]
         hoy = DIAS_SEMANA[date.today().weekday()]
         return hoy in dias_activos and float(self.descuento_porcentaje) > 0
 

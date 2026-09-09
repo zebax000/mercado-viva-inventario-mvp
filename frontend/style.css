@@ -1,22 +1,16 @@
 /* ===== Mercado VIVA — paleta final: vinotinto + mostaza sobre blanco ===== */
 :root {
   --fondo: #FFFFFF;
-  --fondo-panel: #FDFCFA; /* apenas distinto del blanco, para diferenciar el cajon del carrito */
+  --fondo-panel: #FDFCFA;
   --texto: #2A2422;
   --texto-suave: #6B615B;
-
-  /* Vino/burdeos = acento principal */
   --acento: #8C2F39;
   --acento-hover: #74242C;
-
-  /* Mostaza dorado = acento secundario */
   --secundario: #C99A2E;
   --secundario-suave: #F7EFDB;
-
   --borde: #E7E4DF;
   --rojo: #B4453D;
   --blanco: #FFFFFF;
-
   --radio: 6px;
   --fuente-cuerpo: "Inter", system-ui, sans-serif;
   --fuente-marca: "Fraunces", Georgia, serif;
@@ -81,7 +75,6 @@ body {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px;
 }
 
-/* Sobre fondo blanco, el borde es lo unico que separa las tarjetas: un poco mas presente */
 .card-producto {
   border: 1px solid var(--borde); border-radius: var(--radio); background: var(--blanco);
   overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -187,11 +180,10 @@ body {
 .toast--exito { background: var(--acento); }
 
 .brand__logo {
-  height: 52px; /* sube este valor hasta que se vea del tamaño correcto */
+  height: 52px;
   width: auto;
   display: block;
 }
-/* ---- Animacion: salto del icono de carrito al agregar producto ---- */
 @keyframes salto-carrito {
   0% { transform: scale(1); }
   30% { transform: scale(1.28); }
@@ -205,7 +197,6 @@ body {
   animation: salto-carrito 0.4s ease;
 }
 
-/* ---- Overlay de confirmacion de compra (reemplaza el toast largo) ---- */
 .confirmacion-overlay {
   position: fixed;
   inset: 0;
@@ -274,10 +265,6 @@ body {
   font-size: 13.5px;
   color: var(--texto-suave);
 }
-
-/* ============================================================
-Panel de empleado
-============================================================ */
 
 .panel-acceso {
   max-width: 360px;
@@ -406,7 +393,6 @@ Panel de empleado
   margin-right: 0;
 }
 
-/* ---- Modal generico (crear/editar producto, reponer stock) ---- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -446,6 +432,18 @@ Panel de empleado
   font-size: 14px;
 }
 .campo-form input:focus { outline: none; border-color: var(--secundario); }
+.campo-form select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 14px;
+  font-family: var(--fuente-cuerpo);
+  background: var(--blanco);
+  color: var(--texto);
+  cursor: pointer;
+}
+.campo-form select:focus { outline: none; border-color: var(--secundario); }
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -460,7 +458,6 @@ Panel de empleado
   min-height: 14px;
 }
 
-/* ---- Formulario de checkout: datos de entrega dentro del carrito ---- */
 .datos-entrega {
   padding: 4px 0 14px;
   border-bottom: 1px solid var(--borde);
