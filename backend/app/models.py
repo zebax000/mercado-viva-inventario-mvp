@@ -54,6 +54,10 @@ class Usuario(Base):
     registro publico SIEMPRE crea cuentas con rol "cliente" -- el rol "empleado"
     no se puede pedir desde un formulario, solo se asigna manualmente en la base
     de datos, para que nadie pueda auto-otorgarse permisos de administrador.
+
+    nombre_completo, telefono y direccion son opcionales: se completan la primera
+    vez que el cliente hace un pedido y quedan guardados para no tener que pedirlos
+    de nuevo en compras futuras con la sesion iniciada.
     """
     __tablename__ = "usuarios"
 
@@ -62,3 +66,6 @@ class Usuario(Base):
     password = Column(String, nullable=False)  # nunca texto plano: siempre el hash (ver crud.py)
     rol = Column(String, nullable=False, default="cliente")
     creado_en = Column(DateTime(timezone=True), server_default=func.now())
+    nombre_completo = Column(String, nullable=True)
+    telefono = Column(String, nullable=True)
+    direccion = Column(String, nullable=True)
