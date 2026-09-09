@@ -108,12 +108,14 @@
         </span>
         <span class="card-producto__stock"></span>
       </div>
-      <div class="stepper-cantidad" style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px;">
-        <button class="btn-restar-card" type="button" style="border:1px solid var(--borde); background:var(--blanco); width:24px; height:24px; border-radius:var(--radio); cursor:pointer; font-size:14px; line-height:1;">−</button>
-        <span class="cantidad-valor-card" style="font-size:14px; min-width:18px; text-align:center;">1</span>
-        <button class="btn-sumar-card" type="button" style="border:1px solid var(--borde); background:var(--blanco); width:24px; height:24px; border-radius:var(--radio); cursor:pointer; font-size:14px; line-height:1;">+</button>
+      <div class="control-cantidad" style="position:relative; height:37px;">
+        <button class="btn-agregar" type="button" style="width:100%; height:100%;">Agregar al carrito</button>
+        <div class="stepper-cantidad-card" hidden style="display:flex; align-items:center; justify-content:space-between; width:100%; height:100%; border:1px solid var(--acento); border-radius:var(--radio); overflow:hidden;">
+          <button class="btn-restar-card" type="button" style="border:none; background:var(--secundario-suave); color:var(--acento); width:36px; height:100%; cursor:pointer; font-size:16px; font-weight:600;">−</button>
+          <span class="cantidad-valor-card" style="font-size:14px; font-weight:600; color:var(--acento);">1</span>
+          <button class="btn-sumar-card" type="button" style="border:none; background:var(--secundario-suave); color:var(--acento); width:36px; height:100%; cursor:pointer; font-size:16px; font-weight:600;">+</button>
+        </div>
       </div>
-      <button class="btn-agregar" type="button">Agregar al carrito</button>
     </div>
   </article>
 </template>
