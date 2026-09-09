@@ -209,3 +209,113 @@ async function confirmarCompra() {
     btn.textContent = "Confirmar compra";
   }
 }
+
+/* ===== Sesion de usuario (cliente/empleado) ===== */
+
+const SESION_KEY = "mercadoviva_sesion";
+let MODO_MODAL_CUENTA = "login"; // "login" | "registro"
+
+function obtenerSesion() {
+  try {
+    return JSON.parse(sessionStorage.getItem(SESION_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function guardarSesion(sesion) {
+  sessionStorage.setItem(SESION_KEY, JSON.stringify(sesion));
+  actualizarUISesion();
+}
+
+function cerrarSesion() {
+  sessionStorage.removeItem(SESION_KEY);
+  actualizarUISesion();
+  mostrarToast("Sesión cerrada", "info");
+}
+
+function actualizarUISesion() {
+  const sesion = obtenerSesion();
+  const btnCuenta = document.getElementById("btn-cuenta");
+  const linkEmpleado = document.getElementById("link-acceso-empleado");
+  if (!btnCuenta || !linkEmpleado) return;
+
+  if (sesion) {
+    btnCuenta.textContent = `Hola, ${sesion.usuario} · Salir`;
+    linkEmpleado.hidden = sesion.rol !== "empleado";
+  } else {
+    btnCuenta.textContent = "Iniciar sesión";
+    linkEmpleado.hidden = true;
+  }
+}
+
+function abrirModalCuenta() {
+  const sesion = obtenerSesion();
+  if (sesion) {
+    cerrarSesion();
+    return;
+  }
+  cambiarModoModalCuenta("login");
+  document.getElementById("modal-cuenta").hidden = false;
+}
+
+function cerrarModalCuenta() {
+  document.getElementById("modal-cuenta").hidden = true;
+  document.getElementById("form-cuenta").reset();
+  document.getElementById("error-modal-cuenta").textContent = "";
+}
+
+function cambiarModoModalCuenta(modo) {
+  MODO_MODAL_CUENTA = modo;
+  const esLogin = modo === "login";
+  document.getElementById("titulo-modal-cuenta").textContent = esLogin ? "Iniciar sesión" : "Crear cuenta";
+  document.getElementById("btn-enviar-cuenta").textContent = esLogin ? "Iniciar sesión" : "Crear cuenta";
+  document.getElementById("error-modal-cuenta").textContent = "";
+  document.getElementById("tab-login").classList.toggle("btn-primario", esLogin);
+  document.getElementById("tab-login").classList.toggle("btn-secundario", !esLogin);
+  document.getElementById("tab-registro").classList.toggle("btn-primario", !esLogin);
+  document.getElementById("tab-registro").classList.toggle("btn-secundario", esLogin);
+}
+
+async function enviarFormularioCuenta(evento) {
+  evento.preventDefault();
+  const usuario = document.getElementById("input-usuario-cuenta").value.trim();
+  const password = document.getElementById("input-password-cuenta").value;
+  const errorEl = document.getElementById("error-modal-cuenta");
+  const btnEnviar = document.getElementById("btn-enviar-cuenta");
+  errorEl.textContent = "";
+
+  if (!usuario || !password) {
+    errorEl.textContent = "Usuario y contraseña son obligatorios.";
+    return;
+  }
+
+  const ruta = MODO_MODAL_CUENTA === "login" ? "/usuarios/login" : "/usuarios/registro";
+  btnEnviar.disabled = true;
+
+  try {
+    const resultado = await apiFetch(ruta, {
+      method: "POST",
+      body: JSON.stringify({ usuario, password }),
+    });
+    guardarSesion(resultado); // { usuario, rol }
+    cerrarModalCuenta();
+    mostrarToast(
+      MODO_MODAL_CUENTA === "login" ? `Bienvenido, ${resultado.usuario}` : "Cuenta creada con éxito",
+      "exito"
+    );
+  } catch (error) {
+    errorEl.textContent = error.message || "No se pudo completar la operación.";
+  } finally {
+    btnEnviar.disabled = false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  actualizarUISesion();
+  document.getElementById("btn-cuenta").addEventListener("click", abrirModalCuenta);
+  document.getElementById("btn-cancelar-cuenta").addEventListener("click", cerrarModalCuenta);
+  document.getElementById("tab-login").addEventListener("click", () => cambiarModoModalCuenta("login"));
+  document.getElementById("tab-registro").addEventListener("click", () => cambiarModoModalCuenta("registro"));
+  document.getElementById("form-cuenta").addEventListener("submit", enviarFormularioCuenta);
+});

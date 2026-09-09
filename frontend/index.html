@@ -25,7 +25,8 @@
       </svg>
       <span id="contador-carrito" class="cart-count">0</span>
     </button>
-    <a href="empleado.html" class="acceso-empleado">Acceso empleado</a>
+    <button id="btn-cuenta" class="acceso-empleado" type="button" style="cursor:pointer; background:none; border:none;">Iniciar sesión</button>
+    <a href="empleado.html" id="link-acceso-empleado" class="acceso-empleado" hidden>Acceso empleado</a>
   </nav>
 </header>
 
@@ -99,6 +100,35 @@
     <button class="btn-quitar" type="button" aria-label="Quitar producto">&times;</button>
   </li>
 </template>
+
+<div id="modal-cuenta" class="modal-overlay" hidden>
+  <div class="modal">
+    <h3 id="titulo-modal-cuenta">Iniciar sesión</h3>
+
+    <div style="display:flex; gap:8px; margin-bottom:16px;">
+      <button id="tab-login" class="btn-primario" type="button">Iniciar sesión</button>
+      <button id="tab-registro" class="btn-secundario" type="button">Crear cuenta</button>
+    </div>
+
+    <form id="form-cuenta">
+      <div class="campo-form">
+        <label for="input-usuario-cuenta">Usuario</label>
+        <input type="text" id="input-usuario-cuenta" autocomplete="username" required>
+      </div>
+      <div class="campo-form">
+        <label for="input-password-cuenta">Contraseña</label>
+        <input type="password" id="input-password-cuenta" autocomplete="current-password" required>
+      </div>
+
+      <p id="error-modal-cuenta" class="mensaje-error-form"></p>
+
+      <div class="modal-footer">
+        <button type="button" id="btn-cancelar-cuenta" class="btn-secundario">Cancelar</button>
+        <button type="submit" id="btn-enviar-cuenta" class="btn-primario">Iniciar sesión</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <div id="toast" class="toast" hidden></div>
 
