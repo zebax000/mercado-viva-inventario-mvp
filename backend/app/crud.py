@@ -1,7 +1,12 @@
+import binascii
+import hashlib
+import hmac
+import os
+
 from sqlalchemy.orm import Session
 
-from app.models import Producto
-from app.schemas import AjusteStockIn, ProductoCreateIn, ProductoUpdateIn
+from app.models import Producto, Usuario
+from app.schemas import AjusteStockIn, ProductoCreateIn, ProductoUpdateIn, UsuarioLoginIn, UsuarioRegistroIn
 
 
 class ErrorDeNegocio(Exception):
@@ -112,6 +117,8 @@ def ajustar_stock(db: Session, codigo: str, datos: AjusteStockIn) -> Producto:
 
 
 def verificar_codigo_empleado(codigo_ingresado: str, codigo_real: str | None) -> None:
+    """Sistema anterior de acceso (variable de entorno). Se mantiene por compatibilidad
+    mientras el frontend termina de migrar al login con usuario+contrasena."""
     if not codigo_real:
         raise ErrorDeNegocio(
             "CONFIGURACION_INVALIDA",
@@ -119,3 +126,69 @@ def verificar_codigo_empleado(codigo_ingresado: str, codigo_real: str | None) ->
         )
     if codigo_ingresado != codigo_real:
         raise ErrorDeNegocio("CODIGO_INCORRECTO", "El codigo de acceso no es valido")
+
+
+# ============================================================
+# Usuarios: registro y login con contrasena hasheada
+# ============================================================
+#
+# Usamos PBKDF2 (hashlib.pbkdf2_hmac), que viene incluido en la libreria
+# estandar de Python -- no requiere instalar bcrypt ni passlib. La idea es
+# que la contrasena JAMAS se guarda tal cual: se combina con una "sal"
+# aleatoria distinta por usuario y se aplican 260,000 vueltas de SHA-256,
+# para que ni robando la base de datos se pueda recuperar la contrasena
+# original ni sea practico probarlas todas por fuerza bruta.
+
+ITERACIONES_HASH = 260_000
+
+
+def hash_password(password: str) -> str:
+    """Genera una sal aleatoria, calcula el hash PBKDF2 y devuelve ambos
+    juntos como 'sal_en_hex$hash_en_hex' para poder repetir el calculo despues."""
+    sal = os.urandom(16)
+    hash_bytes = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), sal, ITERACIONES_HASH)
+    return f"{binascii.hexlify(sal).decode()}${binascii.hexlify(hash_bytes).decode()}"
+
+
+def verificar_password(password: str, password_guardado: str) -> bool:
+    """Repite el calculo de hash_password() usando la sal ya guardada, y compara
+    el resultado con hmac.compare_digest en vez de '==' -- esto evita 'timing attacks',
+    donde alguien podria medir cuanto tarda la comparacion para adivinar la contrasena
+    caracter por caracter."""
+    try:
+        sal_hex, hash_hex = password_guardado.split("$")
+    except ValueError:
+        return False
+    sal = binascii.unhexlify(sal_hex)
+    hash_esperado = binascii.unhexlify(hash_hex)
+    hash_calculado = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), sal, ITERACIONES_HASH)
+    return hmac.compare_digest(hash_calculado, hash_esperado)
+
+
+def registrar_usuario(db: Session, datos: UsuarioRegistroIn) -> Usuario:
+    """Crea una cuenta de cliente nueva. El rol siempre queda en 'cliente': el
+    formulario publico nunca puede crear una cuenta con permisos de empleado."""
+    existe = db.query(Usuario).filter(Usuario.usuario == datos.usuario).first()
+    if existe is not None:
+        raise ErrorDeNegocio("USUARIO_DUPLICADO", "Ese nombre de usuario ya esta en uso")
+
+    usuario = Usuario(
+        usuario=datos.usuario,
+        password=hash_password(datos.password),
+        rol="cliente",
+    )
+    db.add(usuario)
+    db.commit()
+    db.refresh(usuario)
+    return usuario
+
+
+def iniciar_sesion(db: Session, datos: UsuarioLoginIn) -> Usuario:
+    """Valida usuario + contrasena. Si cualquiera de los dos falla, se devuelve
+    SIEMPRE el mismo error generico (CREDENCIALES_INVALIDAS) a proposito: decir
+    'el usuario no existe' vs 'la contrasena esta mal' le daria pistas a alguien
+    intentando adivinar cuentas validas."""
+    usuario = db.query(Usuario).filter(Usuario.usuario == datos.usuario).first()
+    if usuario is None or not verificar_password(datos.password, usuario.password):
+        raise ErrorDeNegocio("CREDENCIALES_INVALIDAS", "Usuario o contrasena incorrectos")
+    return usuario
