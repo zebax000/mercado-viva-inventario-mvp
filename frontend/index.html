@@ -135,6 +135,47 @@
   <ul id="lista-carrito" class="lista-carrito"></ul>
 
   <div class="panel-carrito__footer">
+
+    <div class="datos-entrega">
+      <div class="campo-form">
+        <label for="input-nombre-entrega">Nombre completo</label>
+        <input type="text" id="input-nombre-entrega" placeholder="Tu nombre">
+      </div>
+      <div class="campo-form">
+        <label for="input-telefono-entrega">Teléfono</label>
+        <input type="tel" id="input-telefono-entrega" placeholder="Ej: 3001234567">
+      </div>
+      <div class="campo-form">
+        <label>Tipo de entrega</label>
+        <div class="opciones-entrega">
+          <label class="opcion-entrega">
+            <input type="radio" name="tipo-entrega" id="radio-recoleccion" value="recoleccion" checked>
+            Recoger en tienda
+          </label>
+          <label class="opcion-entrega">
+            <input type="radio" name="tipo-entrega" id="radio-domicilio" value="domicilio">
+            Envío a domicilio
+          </label>
+        </div>
+      </div>
+      <div class="campo-form" id="campo-direccion-entrega" hidden>
+        <label for="input-direccion-entrega">Dirección de entrega</label>
+        <input type="text" id="input-direccion-entrega" placeholder="Calle, número, barrio">
+      </div>
+      <p id="error-checkout" class="mensaje-error-form"></p>
+    </div>
+
+    <div class="resumen-costos">
+      <div class="resumen-linea">
+        <span>Subtotal</span>
+        <span id="carrito-subtotal">$0</span>
+      </div>
+      <div class="resumen-linea">
+        <span>Envío</span>
+        <span id="carrito-envio">Gratis</span>
+      </div>
+    </div>
+
     <div class="panel-carrito__total">
       <span>Total</span>
       <span id="carrito-total">$0</span>
