@@ -5,6 +5,19 @@ let PRODUCTOS_EMPLEADO = [];
 let CODIGO_EN_EDICION = null;
 let CODIGO_A_REPONER = null;
 
+const SUBCATEGORIAS_POR_CATEGORIA = {
+  "Frutas y Verduras": ["Frutas", "Verduras", "Hierbas y Aromáticas"],
+  "Carnes": ["Res", "Cerdo", "Pollo", "Pescados y Mariscos"],
+  "Lácteos": ["Leche", "Queso", "Yogurt", "Huevos"],
+  "Despensa": ["Granos y Cereales", "Enlatados", "Aceites y Salsas", "Pastas"],
+  "Bebidas": ["Gaseosas", "Jugos", "Agua", "Bebidas Alcohólicas"],
+  "Panadería": ["Pan", "Pastelería", "Tortillas"],
+  "Congelados": ["Comidas Listas", "Vegetales Congelados", "Helados"],
+  "Aseo y Limpieza": ["Detergentes", "Papel Higiénico", "Limpieza del Hogar"],
+  "Cuidado Personal": ["Higiene Personal", "Cosméticos", "Cuidado del Cabello"],
+  "Otros": ["General"],
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   if (sessionStorage.getItem(SESION_KEY) === "1") {
     mostrarPanel();
@@ -21,6 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-cancelar-reponer").addEventListener("click", cerrarModalReponer);
   document.getElementById("btn-confirmar-reponer").addEventListener("click", confirmarReposicion);
+
+  document.getElementById("form-categoria").addEventListener("change", (e) => {
+    poblarSubcategorias(e.target.value, null);
+  });
 });
 
 /* ===== Bloqueo de caracteres invalidos en campos numericos =====
@@ -121,6 +138,47 @@ function renderizarTabla(productos) {
   });
 }
 
+/* ===== Categoria / Subcategoria (listas dependientes) ===== */
+
+function poblarSubcategorias(categoria, subcategoriaSeleccionada) {
+  const select = document.getElementById("form-subcategoria");
+  select.innerHTML = "";
+
+  const opciones = SUBCATEGORIAS_POR_CATEGORIA[categoria] || [];
+
+  if (opciones.length === 0) {
+    const opcionVacia = document.createElement("option");
+    opcionVacia.value = "";
+    opcionVacia.textContent = "Selecciona primero una categoría";
+    select.appendChild(opcionVacia);
+    return;
+  }
+
+  opciones.forEach((opcion) => {
+    const elOpcion = document.createElement("option");
+    elOpcion.value = opcion;
+    elOpcion.textContent = opcion;
+    if (opcion === subcategoriaSeleccionada) elOpcion.selected = true;
+    select.appendChild(elOpcion);
+  });
+}
+
+/* ===== Dias de descuento (checkboxes) ===== */
+
+function marcarDiasDescuento(diasTexto) {
+  const dias = (diasTexto || "").split(",").map((d) => d.trim().toLowerCase()).filter(Boolean);
+  document.querySelectorAll("#grupo-dias-descuento input[type=checkbox]").forEach((checkbox) => {
+    checkbox.checked = dias.includes(checkbox.value);
+  });
+}
+
+function obtenerDiasDescuentoSeleccionados() {
+  const seleccionados = Array.from(
+    document.querySelectorAll("#grupo-dias-descuento input[type=checkbox]:checked")
+  ).map((checkbox) => checkbox.value);
+  return seleccionados.length > 0 ? seleccionados.join(",") : null;
+}
+
 /* ===== Crear / editar producto ===== */
 
 function abrirModalProducto(producto) {
@@ -137,9 +195,10 @@ function abrirModalProducto(producto) {
   document.getElementById("form-precio").value = producto ? producto.precio : 0;
   document.getElementById("form-imagen").value = producto ? (producto.imagen_url || "") : "";
   document.getElementById("form-categoria").value = producto ? (producto.categoria || "") : "";
-  document.getElementById("form-subcategoria").value = producto ? (producto.subcategoria || "") : "";
   document.getElementById("form-descuento").value = producto ? (producto.descuento_porcentaje || 0) : 0;
-  document.getElementById("form-dias-descuento").value = producto ? (producto.dias_descuento || "") : "";
+
+  poblarSubcategorias(producto ? (producto.categoria || "") : "", producto ? producto.subcategoria : null);
+  marcarDiasDescuento(producto ? producto.dias_descuento : null);
 
   document.getElementById("form-stock").closest(".campo-form").style.display = producto ? "none" : "block";
 
@@ -159,10 +218,10 @@ async function guardarProducto() {
   const stock = limpiarNumero(document.getElementById("form-stock").value);
   const precio = limpiarNumero(document.getElementById("form-precio").value);
   const imagen_url = document.getElementById("form-imagen").value.trim() || null;
-  const categoria = document.getElementById("form-categoria").value.trim() || null;
-  const subcategoria = document.getElementById("form-subcategoria").value.trim() || null;
+  const categoria = document.getElementById("form-categoria").value || null;
+  const subcategoria = document.getElementById("form-subcategoria").value || null;
   const descuento_porcentaje = limpiarNumero(document.getElementById("form-descuento").value);
-  const dias_descuento = document.getElementById("form-dias-descuento").value.trim() || null;
+  const dias_descuento = obtenerDiasDescuentoSeleccionados();
 
   if (!codigo || !nombre) {
     errorEl.textContent = "Código y nombre son obligatorios.";
