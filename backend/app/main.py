@@ -74,9 +74,29 @@ def ajustar_stock(codigo: str, datos: schemas.AjusteStockIn, db: Session = Depen
 
 @app.post("/empleado/verificar")
 def verificar_empleado(datos: schemas.EmpleadoAccesoIn):
+    """Sistema anterior de acceso, se mantiene mientras el frontend termina de migrar."""
     try:
         crud.verificar_codigo_empleado(datos.codigo, os.getenv("EMPLEADO_CODIGO"))
         return {"ok": True}
     except crud.ErrorDeNegocio as e:
         status = 401 if e.codigo_error == "CODIGO_INCORRECTO" else 500
         raise HTTPException(status_code=status, detail={"error": e.codigo_error, "mensaje": e.mensaje})
+
+
+@app.post("/usuarios/registro", response_model=schemas.UsuarioOut, status_code=201)
+def registrar_usuario(datos: schemas.UsuarioRegistroIn, db: Session = Depends(get_db)):
+    """Crea una cuenta de cliente nueva. Siempre queda con rol 'cliente'."""
+    try:
+        return crud.registrar_usuario(db, datos)
+    except crud.ErrorDeNegocio as e:
+        raise HTTPException(status_code=400, detail={"error": e.codigo_error, "mensaje": e.mensaje})
+
+
+@app.post("/usuarios/login", response_model=schemas.UsuarioOut)
+def iniciar_sesion(datos: schemas.UsuarioLoginIn, db: Session = Depends(get_db)):
+    """Valida usuario+contrasena y devuelve el rol (cliente o empleado) para que
+    el frontend decida que mostrar."""
+    try:
+        return crud.iniciar_sesion(db, datos)
+    except crud.ErrorDeNegocio as e:
+        raise HTTPException(status_code=401, detail={"error": e.codigo_error, "mensaje": e.mensaje})
