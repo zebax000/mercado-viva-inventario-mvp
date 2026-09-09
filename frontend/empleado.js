@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ===== Bloqueo de caracteres invalidos en campos numericos =====
    input type="number" permite escribir e, E, + y - (notacion cientifica),
    lo que dejaba el campo invalido y el valor terminaba guardandose como 0. */
-const CAMPOS_NUMERICOS_IDS = ["form-stock", "form-precio", "form-cantidad-reponer"];
+const CAMPOS_NUMERICOS_IDS = ["form-stock", "form-precio", "form-cantidad-reponer", "form-descuento"];
 const TECLAS_BLOQUEADAS = ["e", "E", "+", "-"];
 
 document.addEventListener("keydown", (e) => {
@@ -136,6 +136,10 @@ function abrirModalProducto(producto) {
   document.getElementById("form-stock").value = producto ? producto.stock : 0;
   document.getElementById("form-precio").value = producto ? producto.precio : 0;
   document.getElementById("form-imagen").value = producto ? (producto.imagen_url || "") : "";
+  document.getElementById("form-categoria").value = producto ? (producto.categoria || "") : "";
+  document.getElementById("form-subcategoria").value = producto ? (producto.subcategoria || "") : "";
+  document.getElementById("form-descuento").value = producto ? (producto.descuento_porcentaje || 0) : 0;
+  document.getElementById("form-dias-descuento").value = producto ? (producto.dias_descuento || "") : "";
 
   document.getElementById("form-stock").closest(".campo-form").style.display = producto ? "none" : "block";
 
@@ -155,6 +159,10 @@ async function guardarProducto() {
   const stock = limpiarNumero(document.getElementById("form-stock").value);
   const precio = limpiarNumero(document.getElementById("form-precio").value);
   const imagen_url = document.getElementById("form-imagen").value.trim() || null;
+  const categoria = document.getElementById("form-categoria").value.trim() || null;
+  const subcategoria = document.getElementById("form-subcategoria").value.trim() || null;
+  const descuento_porcentaje = limpiarNumero(document.getElementById("form-descuento").value);
+  const dias_descuento = document.getElementById("form-dias-descuento").value.trim() || null;
 
   if (!codigo || !nombre) {
     errorEl.textContent = "Código y nombre son obligatorios.";
@@ -165,13 +173,13 @@ async function guardarProducto() {
     if (CODIGO_EN_EDICION) {
       await apiFetch(`/productos/${CODIGO_EN_EDICION}`, {
         method: "PUT",
-        body: JSON.stringify({ nombre, precio, imagen_url }),
+        body: JSON.stringify({ nombre, precio, imagen_url, categoria, subcategoria, descuento_porcentaje, dias_descuento }),
       });
       mostrarToast("Producto actualizado", "exito");
     } else {
       await apiFetch("/productos", {
         method: "POST",
-        body: JSON.stringify({ codigo, nombre, stock, precio, imagen_url }),
+        body: JSON.stringify({ codigo, nombre, stock, precio, imagen_url, categoria, subcategoria, descuento_porcentaje, dias_descuento }),
       });
       mostrarToast("Producto creado", "exito");
     }
