@@ -121,18 +121,19 @@ function renderizarCatalogo(productos) {
 
     function mostrarBotonAgregar() {
       cantidadEnCarrito = 0;
-      stepperDiv.hidden = true;
-      btnAgregar.hidden = false;
+      stepperDiv.style.display = "none";
+      btnAgregar.style.display = "";
     }
 
     function mostrarStepper() {
       cantidadValorCard.textContent = cantidadEnCarrito;
-      btnAgregar.hidden = true;
-      stepperDiv.hidden = false;
+      btnAgregar.style.display = "none";
+      stepperDiv.style.display = "flex";
     }
 
     btnAgregar.disabled = agotado;
     btnAgregar.textContent = agotado ? "Agotado" : "Agregar al carrito";
+    mostrarBotonAgregar();
 
     btnAgregar.addEventListener("click", () => {
       const productoParaCarrito = { ...producto, precio: precioParaCarrito };
