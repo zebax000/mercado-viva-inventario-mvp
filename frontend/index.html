@@ -12,11 +12,11 @@
 <body>
 
 <header class="site-header" style="align-items:center; padding-bottom:8px;">
-    <div class="brand">
-  <img src="img/logo-mercado-viva-clean.png" alt="Mercado VIVA" class="brand__logo">
-    </div>
+  <div class="brand">
+    <img src="img/logo-mercado-viva-clean.png" alt="Mercado VIVA" class="brand__logo">
+  </div>
 
-  <div style="flex:1; display:flex; justify-content:center; align-items:center; padding: 0 24px;">
+  <div style="flex:1; display:flex; justify-content:center; align-items:center; padding:0 24px;">
     <input
       type="text"
       id="input-buscar"
@@ -35,59 +35,292 @@
       </svg>
       <span id="contador-carrito" class="cart-count">0</span>
     </button>
-    <button id="btn-cuenta" class="acceso-empleado" type="button" style="cursor:pointer; background:none; border:none;">Iniciar sesión</button>
-    <a href="empleado.html" id="link-acceso-empleado" class="acceso-empleado" hidden>Acceso empleado</a>
+
+    <button
+      id="btn-cuenta"
+      class="acceso-empleado"
+      type="button"
+      style="cursor:pointer; background:none; border:none;"
+    >
+      Iniciar sesión
+    </button>
+
+    <a href="empleado.html" id="link-acceso-empleado" class="acceso-empleado" hidden>
+      Acceso empleado
+    </a>
   </nav>
 </header>
 
-<div id="categorias-bar" style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; padding: 8px 32px 12px;">
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg> Todos</button>
-      
+<div
+  id="categorias-bar"
+  style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; padding:8px 32px 12px;"
+>
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria=""
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M4 7h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/>
+        <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+      </svg>
+      Todos
+    </button>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Frutas y Verduras"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M12 8c-4 0-7 3-7 7a5 5 0 0 0 5 5c1.2 0 2-.4 2-.4s.8.4 2 .4a5 5 0 0 0 5-5c0-4-3-7-7-7z"/>
+        <path d="M12 8c0-2 1-3.5 2.5-4"/>
+      </svg>
+      Frutas y Verduras
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Frutas · Verduras · Hierbas y Aromáticas
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Frutas y Verduras" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8c-4 0-7 3-7 7a5 5 0 0 0 5 5c1.2 0 2-.4 2-.4s.8.4 2 .4a5 5 0 0 0 5-5c0-4-3-7-7-7z"/><path d="M12 8c0-2 1-3.5 2.5-4"/></svg> Frutas y Verduras</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Frutas · Verduras · Hierbas y Aromáticas</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Carnes"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M9 15c-2 2-3.5 3-5 4.5"/>
+        <path d="M9 15a5 5 0 1 1 7-7c2 2 2.5 5 1 7.5-1.5 2.5-5.5 2-6.5 1.5-1-1-1.7-1.5-1.5-2z"/>
+      </svg>
+      Carnes
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Res · Cerdo · Pollo · Pescados y Mariscos
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Carnes" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 15c-2 2-3.5 3-5 4.5"/><path d="M9 15a5 5 0 1 1 7-7c2 2 2.5 5 1 7.5-1.5 2.5-5.5 2-6.5 1.5-1-1-1.7-1.5-1.5-2z"/></svg> Carnes</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Res · Cerdo · Pollo · Pescados y Mariscos</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Lácteos"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M12 3C9 3 6.5 9 6.5 14a5.5 5.5 0 0 0 11 0C17.5 9 15 3 12 3z"/>
+      </svg>
+      Lácteos
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Leche · Queso · Yogurt · Huevos
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Lácteos" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3C9 3 6.5 9 6.5 14a5.5 5.5 0 0 0 11 0C17.5 9 15 3 12 3z"/></svg> Lácteos</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Leche · Queso · Yogurt · Huevos</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Despensa"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <rect x="5" y="8" width="14" height="12" rx="1.5"/>
+        <path d="M9 8V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>
+      </svg>
+      Despensa
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Granos y Cereales · Enlatados · Aceites y Salsas · Pastas
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Despensa" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="8" width="14" height="12" rx="1.5"/><path d="M9 8V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg> Despensa</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Granos y Cereales · Enlatados · Aceites y Salsas · Pastas</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Bebidas"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M6 3h12l-1.2 15.5A2 2 0 0 1 14.8 20H9.2a2 2 0 0 1-2-1.5L6 3z"/>
+        <path d="M6.5 8h11"/>
+      </svg>
+      Bebidas
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Gaseosas · Jugos · Agua · Bebidas Alcohólicas
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Bebidas" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3h12l-1.2 15.5A2 2 0 0 1 14.8 20H9.2a2 2 0 0 1-2-1.5L6 3z"/><path d="M6.5 8h11"/></svg> Bebidas</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Gaseosas · Jugos · Agua · Bebidas Alcohólicas</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Panadería"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M4 13c0-4 3.5-8 8-8s8 4 8 8-3 5-8 5-8-1-8-5z"/>
+        <path d="M8 12v3M12 11v4M16 12v3"/>
+      </svg>
+      Panadería
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Pan · Pastelería · Tortillas
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Panadería" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 13c0-4 3.5-8 8-8s8 4 8 8-3 5-8 5-8-1-8-5z"/><path d="M8 12v3M12 11v4M16 12v3"/></svg> Panadería</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Pan · Pastelería · Tortillas</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Congelados"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M12 2v20M4.5 6l15 12M19.5 6l-15 12"/>
+      </svg>
+      Congelados
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Comidas Listas · Vegetales Congelados · Helados
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Congelados" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20M4.5 6l15 12M19.5 6l-15 12"/></svg> Congelados</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Comidas Listas · Vegetales Congelados · Helados</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Aseo y Limpieza"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M9 8h4l1-4"/>
+        <rect x="7" y="8" width="8" height="12" rx="1.5"/>
+        <path d="M12 3h1.5"/>
+      </svg>
+      Aseo y Limpieza
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Detergentes · Papel Higiénico · Limpieza del Hogar
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Aseo y Limpieza" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 8h4l1-4"/><rect x="7" y="8" width="8" height="12" rx="1.5"/><path d="M12 3h1.5"/></svg> Aseo y Limpieza</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Detergentes · Papel Higiénico · Limpieza del Hogar</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Cuidado Personal"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <rect x="8" y="7" width="8" height="14" rx="2"/>
+        <path d="M10 7V5a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/>
+      </svg>
+      Cuidado Personal
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      Higiene Personal · Cosméticos · Cuidado del Cabello
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Cuidado Personal" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="8" y="7" width="8" height="14" rx="2"/><path d="M10 7V5a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg> Cuidado Personal</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">Higiene Personal · Cosméticos · Cuidado del Cabello</div>
+  </div>
+
+  <div style="position:relative;">
+    <button
+      type="button"
+      class="btn-categoria"
+      data-categoria="Otros"
+      style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M3 8l9-5 9 5-9 5-9-5z"/>
+        <path d="M3 8v8l9 5 9-5V8"/>
+        <path d="M12 13v8"/>
+      </svg>
+      Otros
+    </button>
+    <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">
+      General
     </div>
-    <div style="position:relative;">
-      <button type="button" class="btn-categoria" data-categoria="Otros" style="border:1px solid var(--borde); background:var(--blanco); color:var(--texto); font-family:var(--fuente-cuerpo); font-size:14.5px; padding:10px 18px; border-radius:999px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg> Otros</button>
-      <div class="tooltip-categoria" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:6px; background:var(--texto); color:var(--blanco); font-size:11.5px; padding:6px 10px; border-radius:6px; white-space:nowrap; z-index:60; display:none;">General</div>
-    </div>
+  </div>
 </div>
 
-<main class="catalogo-wrap">
+<section class="promociones" aria-label="Promociones destacadas">
+  <div id="slider-promociones" class="slider-promociones">
+    <div class="slider-promociones__pista">
+      <a
+        href="#catalogo"
+        class="slide-promocion"
+        data-categoria-banner="Carnes"
+        aria-label="Ver ofertas de carnes"
+      >
+        <img src="img/banner-descuento-carne.png" alt="Ofertas especiales en carnes">
+      </a>
+
+      <a
+        href="#catalogo"
+        class="slide-promocion"
+        data-categoria-banner="Despensa"
+        aria-label="Ver ofertas de despensa"
+      >
+        <img src="img/banner-descuento-despensa.png" alt="Ofertas especiales en productos de despensa">
+      </a>
+
+      <a
+        href="#catalogo"
+        class="slide-promocion"
+        data-categoria-banner="Lácteos"
+        aria-label="Ver ofertas de lácteos"
+      >
+        <img src="img/banner-descuento-lacteos.png" alt="Ofertas especiales en lácteos">
+      </a>
+    </div>
+
+    <button
+      type="button"
+      class="slider-promociones__flecha slider-promociones__flecha--anterior"
+      aria-label="Promoción anterior"
+    >‹</button>
+
+    <button
+      type="button"
+      class="slider-promociones__flecha slider-promociones__flecha--siguiente"
+      aria-label="Promoción siguiente"
+    >›</button>
+
+    <div class="slider-promociones__puntos" aria-label="Seleccionar promoción">
+      <button
+        type="button"
+        class="slider-promociones__punto activo"
+        data-slide="0"
+        aria-label="Ir a promoción 1"
+        aria-current="true"
+      ></button>
+
+      <button
+        type="button"
+        class="slider-promociones__punto"
+        data-slide="1"
+        aria-label="Ir a promoción 2"
+      ></button>
+
+      <button
+        type="button"
+        class="slider-promociones__punto"
+        data-slide="2"
+        aria-label="Ir a promoción 3"
+      ></button>
+    </div>
+  </div>
+</section>
+
+<main id="catalogo" class="catalogo-wrap">
   <div id="catalogo-mensaje" class="catalogo-mensaje" hidden></div>
   <div id="grid-productos" class="grid-productos"></div>
 </main>
@@ -97,23 +330,52 @@
     <div class="card-producto__img-wrap">
       <img class="card-producto__img" src="" alt="">
       <span class="sello-agotado">Agotado</span>
-      <span class="sello-descuento" style="display:none; position:absolute; top:10px; left:10px; background:var(--acento); color:var(--blanco); font-size:11px; font-weight:600; padding:3px 8px; border-radius:4px;"></span>
+      <span
+        class="sello-descuento"
+        style="display:none; position:absolute; top:10px; left:10px; background:var(--acento); color:var(--blanco); font-size:11px; font-weight:600; padding:3px 8px; border-radius:4px;"
+      ></span>
     </div>
+
     <div class="card-producto__body">
       <p class="card-producto__nombre"></p>
+
       <div class="card-producto__linea-inferior">
         <span style="display:flex; align-items:baseline; gap:6px;">
-          <span class="card-producto__precio-original" style="display:none; text-decoration:line-through; color: var(--texto-suave); font-size:12.5px;"></span>
+          <span
+            class="card-producto__precio-original"
+            style="display:none; text-decoration:line-through; color:var(--texto-suave); font-size:12.5px;"
+          ></span>
           <span class="card-producto__precio"></span>
         </span>
+
         <span class="card-producto__stock"></span>
       </div>
+
       <div class="control-cantidad" style="position:relative; height:37px;">
-        <button class="btn-agregar" type="button" style="width:100%; height:100%;">Agregar al carrito</button>
-        <div class="stepper-cantidad-card" hidden style="display:flex; align-items:center; justify-content:space-between; width:100%; height:100%; border:1px solid var(--acento); border-radius:var(--radio); overflow:hidden;">
-          <button class="btn-restar-card" type="button" style="border:none; background:var(--secundario-suave); color:var(--acento); width:36px; height:100%; cursor:pointer; font-size:16px; font-weight:600;">−</button>
-          <span class="cantidad-valor-card" style="font-size:14px; font-weight:600; color:var(--acento);">1</span>
-          <button class="btn-sumar-card" type="button" style="border:none; background:var(--secundario-suave); color:var(--acento); width:36px; height:100%; cursor:pointer; font-size:16px; font-weight:600;">+</button>
+        <button class="btn-agregar" type="button" style="width:100%; height:100%;">
+          Agregar al carrito
+        </button>
+
+        <div
+          class="stepper-cantidad-card"
+          hidden
+          style="display:flex; align-items:center; justify-content:space-between; width:100%; height:100%; border:1px solid var(--acento); border-radius:var(--radio); overflow:hidden;"
+        >
+          <button
+            class="btn-restar-card"
+            type="button"
+            style="border:none; background:var(--secundario-suave); color:var(--acento); width:36px; height:100%; cursor:pointer; font-size:16px; font-weight:600;"
+          >−</button>
+
+          <span class="cantidad-valor-card" style="font-size:14px; font-weight:600; color:var(--acento);">
+            1
+          </span>
+
+          <button
+            class="btn-sumar-card"
+            type="button"
+            style="border:none; background:var(--secundario-suave); color:var(--acento); width:36px; height:100%; cursor:pointer; font-size:16px; font-weight:600;"
+          >+</button>
         </div>
       </div>
     </div>
@@ -125,7 +387,9 @@
 <aside id="panel-carrito" class="panel-carrito" aria-hidden="true">
   <div class="panel-carrito__header">
     <h2>Tu carrito</h2>
-    <button id="btn-cerrar-carrito" class="btn-cerrar" aria-label="Cerrar carrito">&times;</button>
+    <button id="btn-cerrar-carrito" class="btn-cerrar" aria-label="Cerrar carrito">
+      &times;
+    </button>
   </div>
 
   <div id="carrito-vacio" class="carrito-vacio">
@@ -135,35 +399,56 @@
   <ul id="lista-carrito" class="lista-carrito"></ul>
 
   <div class="panel-carrito__footer">
-
     <div class="datos-entrega">
       <div class="campo-form">
         <label for="input-nombre-entrega">Nombre completo</label>
         <input type="text" id="input-nombre-entrega" placeholder="Tu nombre">
       </div>
+
       <div class="campo-form">
         <label for="input-telefono-entrega">Teléfono</label>
         <input type="tel" id="input-telefono-entrega" placeholder="Ej: 3001234567">
       </div>
+
       <div class="campo-form">
         <label>Tipo de entrega</label>
+
         <div class="opciones-entrega">
           <label class="opcion-entrega">
-            <input type="radio" name="tipo-entrega" id="radio-recoleccion" value="recoleccion" checked>
+            <input
+              type="radio"
+              name="tipo-entrega"
+              id="radio-recoleccion"
+              value="recoleccion"
+              checked
+            >
             Recoger en tienda
           </label>
+
           <label class="opcion-entrega">
-            <input type="radio" name="tipo-entrega" id="radio-domicilio" value="domicilio">
+            <input
+              type="radio"
+              name="tipo-entrega"
+              id="radio-domicilio"
+              value="domicilio"
+            >
             Envío a domicilio
           </label>
         </div>
       </div>
+
       <div class="campo-form" id="campo-direccion-entrega" hidden>
         <label for="input-direccion-entrega">Dirección de entrega</label>
-        <input type="text" id="input-direccion-entrega" placeholder="Calle, número, barrio">
+        <input
+          type="text"
+          id="input-direccion-entrega"
+          placeholder="Calle, número, barrio"
+        >
       </div>
+
       <div class="campo-form">
         <label for="select-metodo-pago">Método de pago</label>
+
         <select id="select-metodo-pago">
           <option value="" disabled selected>Selecciona una opción</option>
           <option value="efectivo">Efectivo</option>
@@ -171,6 +456,7 @@
           <option value="transferencia">Transferencia bancaria</option>
         </select>
       </div>
+
       <p id="error-checkout" class="mensaje-error-form"></p>
     </div>
 
@@ -179,6 +465,7 @@
         <span>Subtotal</span>
         <span id="carrito-subtotal">$0</span>
       </div>
+
       <div class="resumen-linea">
         <span>Envío</span>
         <span id="carrito-envio">Gratis</span>
@@ -189,24 +476,35 @@
       <span>Total</span>
       <span id="carrito-total">$0</span>
     </div>
-    <button id="btn-confirmar-compra" class="btn-confirmar" type="button">Confirmar compra</button>
-    <p class="nota-simulada">Esta es una compra simulada — no se procesa ningún pago real.</p>
+
+    <button id="btn-confirmar-compra" class="btn-confirmar" type="button">
+      Confirmar compra
+    </button>
+
+    <p class="nota-simulada">
+      Esta es una compra simulada — no se procesa ningún pago real.
+    </p>
   </div>
 </aside>
 
 <template id="tpl-item-carrito">
   <li class="item-carrito">
     <img class="item-carrito__img" src="" alt="">
+
     <div class="item-carrito__info">
       <p class="item-carrito__nombre"></p>
       <span class="item-carrito__precio-unit"></span>
     </div>
+
     <div class="item-carrito__cantidad">
       <button class="btn-restar" type="button">−</button>
       <span class="item-carrito__cantidad-valor"></span>
       <button class="btn-sumar" type="button">+</button>
     </div>
-    <button class="btn-quitar" type="button" aria-label="Quitar producto">&times;</button>
+
+    <button class="btn-quitar" type="button" aria-label="Quitar producto">
+      &times;
+    </button>
   </li>
 </template>
 
@@ -215,8 +513,13 @@
     <h3 id="titulo-modal-cuenta">Iniciar sesión</h3>
 
     <div style="display:flex; gap:8px; margin-bottom:16px;">
-      <button id="tab-login" class="btn-primario" type="button">Iniciar sesión</button>
-      <button id="tab-registro" class="btn-secundario" type="button">Crear cuenta</button>
+      <button id="tab-login" class="btn-primario" type="button">
+        Iniciar sesión
+      </button>
+
+      <button id="tab-registro" class="btn-secundario" type="button">
+        Crear cuenta
+      </button>
     </div>
 
     <form id="form-cuenta">
@@ -224,22 +527,49 @@
         <label for="input-usuario-cuenta">Usuario</label>
         <input type="text" id="input-usuario-cuenta" autocomplete="username" required>
       </div>
+
       <div class="campo-form">
         <label for="input-password-cuenta">Contraseña</label>
-        <input type="password" id="input-password-cuenta" autocomplete="current-password" required>
+        <input
+          type="password"
+          id="input-password-cuenta"
+          autocomplete="current-password"
+          required
+        >
       </div>
 
       <p id="error-modal-cuenta" class="mensaje-error-form"></p>
 
       <div class="modal-footer">
-        <button type="button" id="btn-cancelar-cuenta" class="btn-secundario">Cancelar</button>
-        <button type="submit" id="btn-enviar-cuenta" class="btn-primario">Iniciar sesión</button>
+        <button type="button" id="btn-cancelar-cuenta" class="btn-secundario">
+          Cancelar
+        </button>
+
+        <button type="submit" id="btn-enviar-cuenta" class="btn-primario">
+          Iniciar sesión
+        </button>
       </div>
     </form>
   </div>
 </div>
 
 <div id="toast" class="toast" hidden></div>
+
+<footer class="site-footer">
+  <div class="site-footer__marca">
+    <img
+      src="img/logo-mercado-viva-clean.png"
+      alt="Mercado VIVA"
+      class="site-footer__logo"
+    >
+    <p>Tu mercado de confianza, más cerca de ti.</p>
+  </div>
+
+  <div class="site-footer__info">
+    <p>Compra simulada · No se procesa ningún pago real.</p>
+    <a href="empleado.html">Acceso empleado</a>
+  </div>
+</footer>
 
 <script src="script.js"></script>
 <script src="cliente.js"></script>

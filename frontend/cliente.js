@@ -17,11 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
   cargarCatalogo();
   cargarDatosEntregaGuardados();
   render_carrito();
+  inicializarSliderPromociones();
 
   document.getElementById("btn-abrir-carrito").addEventListener("click", abrirCarrito);
   document.getElementById("btn-cerrar-carrito").addEventListener("click", cerrarCarrito);
   document.getElementById("overlay").addEventListener("click", cerrarCarrito);
   document.getElementById("btn-confirmar-compra").addEventListener("click", confirmarCompra);
+
   document.getElementById("input-buscar").addEventListener("input", () => {
     aplicarFiltrosYRenderizar();
   });
@@ -41,11 +43,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const tooltip = boton.parentElement.querySelector(".tooltip-categoria");
+
     if (tooltip) {
-      boton.addEventListener("mouseenter", () => { tooltip.style.display = "block"; });
-      boton.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+      boton.addEventListener("mouseenter", () => {
+        tooltip.style.display = "block";
+      });
+
+      boton.addEventListener("mouseleave", () => {
+        tooltip.style.display = "none";
+      });
     }
   });
+
   actualizarEstiloBotonesCategoria();
 });
 
@@ -54,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function cargarCatalogo() {
   const mensajeEl = document.getElementById("catalogo-mensaje");
   const gridEl = document.getElementById("grid-productos");
+
   mensajeEl.hidden = true;
 
   try {
@@ -62,6 +72,7 @@ async function cargarCatalogo() {
   } catch (error) {
     gridEl.innerHTML = "";
     mensajeEl.hidden = false;
+
     mensajeEl.textContent = error.codigoError === "INVENTARIO_VACIO"
       ? "Todavia no hay productos publicados en el catálogo."
       : `No se pudo cargar el catálogo: ${error.message}`;
@@ -71,6 +82,7 @@ async function cargarCatalogo() {
 function actualizarEstiloBotonesCategoria() {
   document.querySelectorAll("#categorias-bar .btn-categoria").forEach((boton) => {
     const activo = boton.dataset.categoria === CATEGORIA_ACTIVA;
+
     boton.style.background = activo ? "var(--acento)" : "var(--blanco)";
     boton.style.color = activo ? "var(--blanco)" : "var(--texto)";
     boton.style.borderColor = activo ? "var(--acento)" : "var(--borde)";
@@ -80,11 +92,14 @@ function actualizarEstiloBotonesCategoria() {
 function aplicarFiltrosYRenderizar() {
   const busqueda = document.getElementById("input-buscar").value.trim().toLowerCase();
 
-  const filtrados = PRODUCTOS_CACHE.filter((p) => {
+  const filtrados = PRODUCTOS_CACHE.filter((producto) => {
     const coincideTexto = !busqueda
-      || p.nombre.toLowerCase().includes(busqueda)
-      || p.codigo.toLowerCase().includes(busqueda);
-    const coincideCategoria = !CATEGORIA_ACTIVA || p.categoria === CATEGORIA_ACTIVA;
+      || producto.nombre.toLowerCase().includes(busqueda)
+      || producto.codigo.toLowerCase().includes(busqueda);
+
+    const coincideCategoria = !CATEGORIA_ACTIVA
+      || producto.categoria === CATEGORIA_ACTIVA;
+
     return coincideTexto && coincideCategoria;
   });
 
@@ -94,10 +109,12 @@ function aplicarFiltrosYRenderizar() {
 function renderizarCatalogo(productos) {
   const gridEl = document.getElementById("grid-productos");
   const tpl = document.getElementById("tpl-tarjeta-producto");
+
   gridEl.innerHTML = "";
 
   productos.forEach((producto) => {
     const nodo = tpl.content.cloneNode(true);
+
     const card = nodo.querySelector(".card-producto");
     const img = nodo.querySelector(".card-producto__img");
     const nombre = nodo.querySelector(".card-producto__nombre");
@@ -119,6 +136,7 @@ function renderizarCatalogo(productos) {
       precio.textContent = formatearPrecio(producto.precio_final);
       precioOriginal.textContent = formatearPrecio(producto.precio);
       precioOriginal.style.display = "inline";
+
       selloDescuento.textContent = `-${Math.round(producto.descuento_porcentaje)}%`;
       selloDescuento.style.display = "inline-block";
     } else {
@@ -131,10 +149,19 @@ function renderizarCatalogo(productos) {
     const bajo = producto.stock > 0 && producto.stock <= 5;
 
     stock.textContent = agotado ? "Sin stock" : `Stock: ${producto.stock}`;
-    if (bajo) stock.classList.add("card-producto__stock--bajo");
-    if (agotado) card.classList.add("card-producto--agotado");
 
-    const precioParaCarrito = producto.en_descuento_hoy ? producto.precio_final : producto.precio;
+    if (bajo) {
+      stock.classList.add("card-producto__stock--bajo");
+    }
+
+    if (agotado) {
+      card.classList.add("card-producto--agotado");
+    }
+
+    const precioParaCarrito = producto.en_descuento_hoy
+      ? producto.precio_final
+      : producto.precio;
+
     let cantidadEnCarrito = 0;
 
     function mostrarBotonAgregar() {
@@ -151,27 +178,40 @@ function renderizarCatalogo(productos) {
 
     btnAgregar.disabled = agotado;
     btnAgregar.textContent = agotado ? "Agotado" : "Agregar al carrito";
+
     mostrarBotonAgregar();
 
     btnAgregar.addEventListener("click", () => {
-      const productoParaCarrito = { ...producto, precio: precioParaCarrito };
+      const productoParaCarrito = {
+        ...producto,
+        precio: precioParaCarrito,
+      };
+
       render_carrito(agregarAlCarrito(productoParaCarrito, 1));
       animarIconoCarrito();
+
       cantidadEnCarrito = 1;
       mostrarStepper();
     });
 
     btnSumarCard.addEventListener("click", () => {
-      if (producto.stock > 0 && cantidadEnCarrito >= producto.stock) return;
+      if (producto.stock > 0 && cantidadEnCarrito >= producto.stock) {
+        return;
+      }
+
       render_carrito(cambiarCantidad(producto.codigo, 1));
+
       cantidadEnCarrito += 1;
       cantidadValorCard.textContent = cantidadEnCarrito;
+
       animarIconoCarrito();
     });
 
     btnRestarCard.addEventListener("click", () => {
       render_carrito(cambiarCantidad(producto.codigo, -1));
+
       cantidadEnCarrito -= 1;
+
       if (cantidadEnCarrito <= 0) {
         mostrarBotonAgregar();
       } else {
@@ -188,12 +228,15 @@ function renderizarCatalogo(productos) {
 function animarIconoCarrito() {
   const icono = document.getElementById("btn-abrir-carrito");
   const contador = document.getElementById("contador-carrito");
+
   icono.classList.remove("animando");
   contador.classList.remove("animando");
+
   requestAnimationFrame(() => {
     icono.classList.add("animando");
     contador.classList.add("animando");
   });
+
   setTimeout(() => {
     icono.classList.remove("animando");
     contador.classList.remove("animando");
@@ -204,51 +247,73 @@ function animarIconoCarrito() {
 
 function obtenerTipoEntregaSeleccionado() {
   const radio = document.querySelector('input[name="tipo-entrega"]:checked');
+
   return radio ? radio.value : "recoleccion";
 }
 
 function actualizarVisibilidadDireccion() {
   const esDomicilio = obtenerTipoEntregaSeleccionado() === "domicilio";
+
   document.getElementById("campo-direccion-entrega").hidden = !esDomicilio;
 }
 
 function calcularCostoEnvio(subtotal, tipoEntrega) {
-  if (tipoEntrega !== "domicilio") return 0;
+  if (tipoEntrega !== "domicilio") {
+    return 0;
+  }
+
   return subtotal < UMBRAL_ENVIO_GRATIS ? COSTO_ENVIO : 0;
 }
 
-/* ===== Datos de entrega: precarga y guardado (sesion o localStorage) ===== */
+/* ===== Datos de entrega: precarga y guardado ===== */
 
 function cargarDatosEntregaGuardados() {
   const sesion = obtenerSesion();
+
   if (sesion && (sesion.nombre_completo || sesion.telefono || sesion.direccion)) {
     aplicarDatosEntregaAlFormulario(sesion);
     return;
   }
+
   try {
     const guardados = JSON.parse(localStorage.getItem(DATOS_ENTREGA_KEY));
-    if (guardados) aplicarDatosEntregaAlFormulario(guardados);
+
+    if (guardados) {
+      aplicarDatosEntregaAlFormulario(guardados);
+    }
   } catch {
-    /* sin datos guardados, se deja el formulario vacio */
+    /* Sin datos guardados: el formulario se mantiene vacío */
   }
 }
 
 function aplicarDatosEntregaAlFormulario(datos) {
-  if (datos.nombre_completo) document.getElementById("input-nombre-entrega").value = datos.nombre_completo;
-  if (datos.telefono) document.getElementById("input-telefono-entrega").value = datos.telefono;
-  if (datos.direccion) document.getElementById("input-direccion-entrega").value = datos.direccion;
+  if (datos.nombre_completo) {
+    document.getElementById("input-nombre-entrega").value = datos.nombre_completo;
+  }
+
+  if (datos.telefono) {
+    document.getElementById("input-telefono-entrega").value = datos.telefono;
+  }
+
+  if (datos.direccion) {
+    document.getElementById("input-direccion-entrega").value = datos.direccion;
+  }
 }
 
 async function guardarDatosEntrega(datos) {
   const sesion = obtenerSesion();
+
   if (sesion) {
     try {
-      await apiFetch(`/usuarios/${encodeURIComponent(sesion.usuario)}/datos-entrega`, {
-        method: "PUT",
-        body: JSON.stringify(datos),
-      });
+      await apiFetch(
+        `/usuarios/${encodeURIComponent(sesion.usuario)}/datos-entrega`,
+        {
+          method: "PUT",
+          body: JSON.stringify(datos),
+        }
+      );
     } catch {
-      /* si falla el guardado remoto, no interrumpe la compra */
+      /* Si falla la persistencia remota, no se interrumpe la compra simulada */
     }
   } else {
     localStorage.setItem(DATOS_ENTREGA_KEY, JSON.stringify(datos));
@@ -259,6 +324,7 @@ async function guardarDatosEntrega(datos) {
 
 function render_carrito(carritoOpcional) {
   const carrito = carritoOpcional || obtenerCarrito();
+
   const listaEl = document.getElementById("lista-carrito");
   const vacioEl = document.getElementById("carrito-vacio");
   const subtotalEl = document.getElementById("carrito-subtotal");
@@ -274,17 +340,25 @@ function render_carrito(carritoOpcional) {
 
   carrito.forEach((item) => {
     const nodo = tpl.content.cloneNode(true);
-    nodo.querySelector(".item-carrito__img").src = item.imagen_url || "img/placeholder.png";
+
+    nodo.querySelector(".item-carrito__img").src =
+      item.imagen_url || "img/placeholder.png";
+
     nodo.querySelector(".item-carrito__nombre").textContent = item.nombre;
-    nodo.querySelector(".item-carrito__precio-unit").textContent = formatearPrecio(item.precio);
-    nodo.querySelector(".item-carrito__cantidad-valor").textContent = item.cantidad;
+    nodo.querySelector(".item-carrito__precio-unit").textContent =
+      formatearPrecio(item.precio);
+
+    nodo.querySelector(".item-carrito__cantidad-valor").textContent =
+      item.cantidad;
 
     nodo.querySelector(".btn-restar").addEventListener("click", () => {
       render_carrito(cambiarCantidad(item.codigo, -1));
     });
+
     nodo.querySelector(".btn-sumar").addEventListener("click", () => {
       render_carrito(cambiarCantidad(item.codigo, 1));
     });
+
     nodo.querySelector(".btn-quitar").addEventListener("click", () => {
       render_carrito(quitarDelCarrito(item.codigo));
     });
@@ -298,10 +372,16 @@ function render_carrito(carritoOpcional) {
   const total = subtotal + costoEnvio;
 
   subtotalEl.textContent = formatearPrecio(subtotal);
-  envioEl.textContent = costoEnvio > 0 ? formatearPrecio(costoEnvio) : "Gratis";
+  envioEl.textContent = costoEnvio > 0
+    ? formatearPrecio(costoEnvio)
+    : "Gratis";
+
   totalEl.textContent = formatearPrecio(total);
 
-  const totalUnidades = carrito.reduce((acc, i) => acc + i.cantidad, 0);
+  const totalUnidades = carrito.reduce((acumulado, item) => {
+    return acumulado + item.cantidad;
+  }, 0);
+
   contadorEl.textContent = totalUnidades;
 }
 
@@ -317,7 +397,7 @@ function cerrarCarrito() {
   document.getElementById("overlay").hidden = true;
 }
 
-/* ===== Overlay de confirmacion de compra (check animado) ===== */
+/* ===== Confirmacion de compra ===== */
 
 function mostrarConfirmacionCompra(metodoPagoTexto) {
   let overlay = document.getElementById("confirmacion-overlay");
@@ -326,54 +406,91 @@ function mostrarConfirmacionCompra(metodoPagoTexto) {
     overlay = document.createElement("div");
     overlay.id = "confirmacion-overlay";
     overlay.className = "confirmacion-overlay";
+
     document.body.appendChild(overlay);
-    overlay.addEventListener("click", () => overlay.classList.remove("visible"));
+
+    overlay.addEventListener("click", () => {
+      overlay.classList.remove("visible");
+    });
   }
 
   overlay.innerHTML = `
     <div class="confirmacion-card">
       <div class="confirmacion-check">
-        <svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6"/></svg>
+        <svg viewBox="0 0 24 24">
+          <path d="M4 12.5l5 5L20 6"/>
+        </svg>
       </div>
+
       <p class="confirmacion-titulo">¡Compra simulada realizada!</p>
       <p class="confirmacion-texto">Gracias por tu compra en Mercado VIVA.</p>
-      ${metodoPagoTexto ? `<p class="confirmacion-texto">Método de pago: ${metodoPagoTexto}</p>` : ""}
+
+      ${
+        metodoPagoTexto
+          ? `<p class="confirmacion-texto">Método de pago: ${metodoPagoTexto}</p>`
+          : ""
+      }
     </div>
   `;
 
-  requestAnimationFrame(() => overlay.classList.add("visible"));
-  setTimeout(() => overlay.classList.remove("visible"), 2200);
+  requestAnimationFrame(() => {
+    overlay.classList.add("visible");
+  });
+
+  setTimeout(() => {
+    overlay.classList.remove("visible");
+  }, 2200);
 }
 
 /* ===== Checkout simulado ===== */
 
 async function confirmarCompra() {
   const carrito = obtenerCarrito();
-  if (carrito.length === 0) return;
+
+  if (carrito.length === 0) {
+    return;
+  }
 
   const errorEl = document.getElementById("error-checkout");
+
   errorEl.textContent = "";
 
-  const nombreCompleto = document.getElementById("input-nombre-entrega").value.trim();
-  const telefono = document.getElementById("input-telefono-entrega").value.trim();
+  const nombreCompleto = document
+    .getElementById("input-nombre-entrega")
+    .value
+    .trim();
+
+  const telefono = document
+    .getElementById("input-telefono-entrega")
+    .value
+    .trim();
+
   const tipoEntrega = obtenerTipoEntregaSeleccionado();
-  const direccion = document.getElementById("input-direccion-entrega").value.trim();
+
+  const direccion = document
+    .getElementById("input-direccion-entrega")
+    .value
+    .trim();
+
   const metodoPago = document.getElementById("select-metodo-pago").value;
 
   if (!nombreCompleto || !telefono) {
     errorEl.textContent = "Nombre y teléfono son obligatorios.";
     return;
   }
+
   if (tipoEntrega === "domicilio" && !direccion) {
     errorEl.textContent = "Ingresa la dirección para el envío a domicilio.";
     return;
   }
+
   if (!metodoPago) {
     errorEl.textContent = "Selecciona un método de pago.";
     return;
   }
 
   const btn = document.getElementById("btn-confirmar-compra");
+
   btn.disabled = true;
   btn.textContent = "Procesando...";
 
@@ -381,7 +498,10 @@ async function confirmarCompra() {
     for (const item of carrito) {
       await apiFetch(`/productos/${item.codigo}/stock/ajuste`, {
         method: "POST",
-        body: JSON.stringify({ tipo_operacion: "venta", cantidad: item.cantidad }),
+        body: JSON.stringify({
+          tipo_operacion: "venta",
+          cantidad: item.cantidad,
+        }),
       });
     }
 
@@ -394,9 +514,12 @@ async function confirmarCompra() {
     vaciarCarrito();
     render_carrito();
     cerrarCarrito();
+
     mostrarConfirmacionCompra(METODOS_PAGO_LABEL[metodoPago] || "");
+
     document.getElementById("select-metodo-pago").selectedIndex = 0;
-    cargarCatalogo(); // refresca el stock visible en el catalogo
+
+    cargarCatalogo();
   } catch (error) {
     mostrarToast(`No se pudo completar la compra: ${error.message}`, "error");
   } finally {
@@ -405,10 +528,10 @@ async function confirmarCompra() {
   }
 }
 
-/* ===== Sesion de usuario (cliente/empleado) ===== */
+/* ===== Sesion de usuario ===== */
 
 const SESION_KEY = "mercadoviva_sesion";
-let MODO_MODAL_CUENTA = "login"; // "login" | "registro"
+let MODO_MODAL_CUENTA = "login";
 
 function obtenerSesion() {
   try {
@@ -434,7 +557,10 @@ function actualizarUISesion() {
   const sesion = obtenerSesion();
   const btnCuenta = document.getElementById("btn-cuenta");
   const linkEmpleado = document.getElementById("link-acceso-empleado");
-  if (!btnCuenta || !linkEmpleado) return;
+
+  if (!btnCuenta || !linkEmpleado) {
+    return;
+  }
 
   if (sesion) {
     btnCuenta.textContent = `Hola, ${sesion.usuario} · Salir`;
@@ -447,11 +573,14 @@ function actualizarUISesion() {
 
 function abrirModalCuenta() {
   const sesion = obtenerSesion();
+
   if (sesion) {
     cerrarSesion();
     return;
   }
+
   cambiarModoModalCuenta("login");
+
   document.getElementById("modal-cuenta").hidden = false;
 }
 
@@ -463,22 +592,39 @@ function cerrarModalCuenta() {
 
 function cambiarModoModalCuenta(modo) {
   MODO_MODAL_CUENTA = modo;
+
   const esLogin = modo === "login";
-  document.getElementById("titulo-modal-cuenta").textContent = esLogin ? "Iniciar sesión" : "Crear cuenta";
-  document.getElementById("btn-enviar-cuenta").textContent = esLogin ? "Iniciar sesión" : "Crear cuenta";
+
+  document.getElementById("titulo-modal-cuenta").textContent = esLogin
+    ? "Iniciar sesión"
+    : "Crear cuenta";
+
+  document.getElementById("btn-enviar-cuenta").textContent = esLogin
+    ? "Iniciar sesión"
+    : "Crear cuenta";
+
   document.getElementById("error-modal-cuenta").textContent = "";
+
   document.getElementById("tab-login").classList.toggle("btn-primario", esLogin);
   document.getElementById("tab-login").classList.toggle("btn-secundario", !esLogin);
+
   document.getElementById("tab-registro").classList.toggle("btn-primario", !esLogin);
   document.getElementById("tab-registro").classList.toggle("btn-secundario", esLogin);
 }
 
 async function enviarFormularioCuenta(evento) {
   evento.preventDefault();
-  const usuario = document.getElementById("input-usuario-cuenta").value.trim();
+
+  const usuario = document
+    .getElementById("input-usuario-cuenta")
+    .value
+    .trim();
+
   const password = document.getElementById("input-password-cuenta").value;
+
   const errorEl = document.getElementById("error-modal-cuenta");
   const btnEnviar = document.getElementById("btn-enviar-cuenta");
+
   errorEl.textContent = "";
 
   if (!usuario || !password) {
@@ -486,18 +632,29 @@ async function enviarFormularioCuenta(evento) {
     return;
   }
 
-  const ruta = MODO_MODAL_CUENTA === "login" ? "/usuarios/login" : "/usuarios/registro";
+  const ruta = MODO_MODAL_CUENTA === "login"
+    ? "/usuarios/login"
+    : "/usuarios/registro";
+
   btnEnviar.disabled = true;
 
   try {
     const resultado = await apiFetch(ruta, {
       method: "POST",
-      body: JSON.stringify({ usuario, password }),
+      body: JSON.stringify({
+        usuario,
+        password,
+      }),
     });
-    guardarSesion(resultado); // { usuario, rol, nombre_completo, telefono, direccion }
+
+    guardarSesion(resultado);
+
     cerrarModalCuenta();
+
     mostrarToast(
-      MODO_MODAL_CUENTA === "login" ? `Bienvenido, ${resultado.usuario}` : "Cuenta creada con éxito",
+      MODO_MODAL_CUENTA === "login"
+        ? `Bienvenido, ${resultado.usuario}`
+        : "Cuenta creada con éxito",
       "exito"
     );
   } catch (error) {
@@ -509,9 +666,110 @@ async function enviarFormularioCuenta(evento) {
 
 document.addEventListener("DOMContentLoaded", () => {
   actualizarUISesion();
+
   document.getElementById("btn-cuenta").addEventListener("click", abrirModalCuenta);
-  document.getElementById("btn-cancelar-cuenta").addEventListener("click", cerrarModalCuenta);
-  document.getElementById("tab-login").addEventListener("click", () => cambiarModoModalCuenta("login"));
-  document.getElementById("tab-registro").addEventListener("click", () => cambiarModoModalCuenta("registro"));
-  document.getElementById("form-cuenta").addEventListener("submit", enviarFormularioCuenta);
+
+  document
+    .getElementById("btn-cancelar-cuenta")
+    .addEventListener("click", cerrarModalCuenta);
+
+  document
+    .getElementById("tab-login")
+    .addEventListener("click", () => cambiarModoModalCuenta("login"));
+
+  document
+    .getElementById("tab-registro")
+    .addEventListener("click", () => cambiarModoModalCuenta("registro"));
+
+  document
+    .getElementById("form-cuenta")
+    .addEventListener("submit", enviarFormularioCuenta);
 });
+
+/* ===== Carrusel de promociones ===== */
+
+let slidePromocionActual = 0;
+let intervaloPromociones = null;
+
+function inicializarSliderPromociones() {
+  const slider = document.getElementById("slider-promociones");
+
+  if (!slider) {
+    return;
+  }
+
+  const slides = slider.querySelectorAll(".slide-promocion");
+  const pista = slider.querySelector(".slider-promociones__pista");
+
+  const btnAnterior = slider.querySelector(
+    ".slider-promociones__flecha--anterior"
+  );
+
+  const btnSiguiente = slider.querySelector(
+    ".slider-promociones__flecha--siguiente"
+  );
+
+  const puntos = slider.querySelectorAll(".slider-promociones__punto");
+
+  function irASlide(indice) {
+    slidePromocionActual = (indice + slides.length) % slides.length;
+
+    pista.style.transform = `translateX(-${slidePromocionActual * 100}%)`;
+
+    puntos.forEach((punto, i) => {
+      const activo = i === slidePromocionActual;
+
+      punto.classList.toggle("activo", activo);
+      punto.setAttribute("aria-current", activo ? "true" : "false");
+    });
+  }
+
+  function reiniciarAutoavance() {
+    clearInterval(intervaloPromociones);
+
+    intervaloPromociones = setInterval(() => {
+      irASlide(slidePromocionActual + 1);
+    }, 5000);
+  }
+
+  btnAnterior.addEventListener("click", () => {
+    irASlide(slidePromocionActual - 1);
+    reiniciarAutoavance();
+  });
+
+  btnSiguiente.addEventListener("click", () => {
+    irASlide(slidePromocionActual + 1);
+    reiniciarAutoavance();
+  });
+
+  puntos.forEach((punto) => {
+    punto.addEventListener("click", () => {
+      irASlide(Number(punto.dataset.slide));
+      reiniciarAutoavance();
+    });
+  });
+
+  slides.forEach((slide) => {
+    slide.addEventListener("click", () => {
+      CATEGORIA_ACTIVA = slide.dataset.categoriaBanner;
+
+      actualizarEstiloBotonesCategoria();
+      aplicarFiltrosYRenderizar();
+
+      document.getElementById("catalogo").scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  });
+
+  slider.addEventListener("mouseenter", () => {
+    clearInterval(intervaloPromociones);
+  });
+
+  slider.addEventListener("mouseleave", () => {
+    reiniciarAutoavance();
+  });
+
+  reiniciarAutoavance();
+}
