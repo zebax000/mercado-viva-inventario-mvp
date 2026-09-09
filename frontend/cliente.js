@@ -88,6 +88,9 @@ function renderizarCatalogo(productos) {
     const selloDescuento = nodo.querySelector(".sello-descuento");
     const stock = nodo.querySelector(".card-producto__stock");
     const btnAgregar = nodo.querySelector(".btn-agregar");
+    const btnRestarCard = nodo.querySelector(".btn-restar-card");
+    const btnSumarCard = nodo.querySelector(".btn-sumar-card");
+    const cantidadValorCard = nodo.querySelector(".cantidad-valor-card");
 
     img.src = producto.imagen_url || "img/placeholder.png";
     img.alt = producto.nombre;
@@ -112,6 +115,25 @@ function renderizarCatalogo(productos) {
     if (bajo) stock.classList.add("card-producto__stock--bajo");
     if (agotado) card.classList.add("card-producto--agotado");
 
+    let cantidadElegida = 1;
+
+    btnRestarCard.addEventListener("click", () => {
+      if (cantidadElegida <= 1) return;
+      cantidadElegida -= 1;
+      cantidadValorCard.textContent = cantidadElegida;
+    });
+
+    btnSumarCard.addEventListener("click", () => {
+      if (producto.stock > 0 && cantidadElegida >= producto.stock) return;
+      cantidadElegida += 1;
+      cantidadValorCard.textContent = cantidadElegida;
+    });
+
+    if (agotado) {
+      btnRestarCard.disabled = true;
+      btnSumarCard.disabled = true;
+    }
+
     btnAgregar.disabled = agotado;
     btnAgregar.textContent = agotado ? "Agotado" : "Agregar al carrito";
     btnAgregar.addEventListener("click", () => {
@@ -119,9 +141,11 @@ function renderizarCatalogo(productos) {
         ...producto,
         precio: producto.en_descuento_hoy ? producto.precio_final : producto.precio,
       };
-      render_carrito(agregarAlCarrito(productoParaCarrito));
+      render_carrito(agregarAlCarrito(productoParaCarrito, cantidadElegida));
       animarIconoCarrito();
-      mostrarToast(`${producto.nombre} agregado al carrito`, "exito");
+      mostrarToast(`${cantidadElegida} x ${producto.nombre} agregado al carrito`, "exito");
+      cantidadElegida = 1;
+      cantidadValorCard.textContent = cantidadElegida;
     });
 
     gridEl.appendChild(nodo);
