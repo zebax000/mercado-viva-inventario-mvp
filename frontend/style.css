@@ -1013,3 +1013,285 @@ body {
     flex-wrap: wrap;
   }
 }
+
+/* ============================================================
+   Checkout profesional: dirección, mapa y pago simulado
+   ============================================================ */
+
+.panel-carrito__footer {
+  overflow-y: auto;
+}
+
+.campo-direccion-mapa {
+  margin-bottom: 16px;
+}
+
+.direccion-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.direccion-acciones input {
+  min-width: 0;
+  flex: 1;
+}
+
+.btn-ubicar-direccion {
+  flex: 0 0 auto;
+  padding: 9px 11px;
+  border: 1px solid var(--acento);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  color: var(--acento);
+  cursor: pointer;
+  font-family: var(--fuente-cuerpo);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.btn-ubicar-direccion:hover {
+  background: var(--secundario-suave);
+}
+
+.btn-ubicar-direccion:disabled {
+  border-color: var(--borde);
+  color: var(--texto-suave);
+  cursor: wait;
+}
+
+.ayuda-direccion,
+.estado-ubicacion {
+  margin-top: 6px;
+  color: var(--texto-suave);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.estado-ubicacion {
+  min-height: 16px;
+}
+
+.estado-ubicacion--exito {
+  color: #476F42;
+}
+
+.estado-ubicacion--error {
+  color: var(--rojo);
+}
+
+.contenedor-mapa-entrega {
+  margin-top: 10px;
+  overflow: hidden;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--blanco);
+}
+
+#mapa-entrega {
+  width: 100%;
+  height: 190px;
+  background: var(--secundario-suave);
+  touch-action: none;
+  transition: height 0.35s ease;
+}
+
+.contenedor-mapa-entrega.mapa-expandido #mapa-entrega {
+  height: 340px;
+}
+
+.contenedor-mapa-entrega .leaflet-container {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.confirmacion-ubicacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  color: var(--texto);
+  cursor: pointer;
+  font-size: 11.5px;
+  line-height: 1.35;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.confirmacion-ubicacion input {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  accent-color: var(--acento);
+  cursor: pointer;
+}
+
+.bloque-pago {
+  padding-top: 2px;
+}
+
+.label-pago {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--texto-suave);
+  font-size: 12.5px;
+}
+
+.opciones-metodo-pago {
+  display: grid;
+  gap: 7px;
+}
+
+.opcion-pago {
+  display: grid;
+  grid-template-columns: auto 30px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.opcion-pago:hover {
+  border-color: var(--secundario);
+}
+
+.opcion-pago:has(input:checked) {
+  border-color: var(--acento);
+  background: #FFF8F8;
+  box-shadow: 0 2px 7px rgba(140, 47, 57, 0.08);
+}
+
+.opcion-pago input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--acento);
+  cursor: pointer;
+}
+
+.opcion-pago__icono {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--secundario-suave);
+  color: var(--acento);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.opcion-pago__contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.opcion-pago__contenido strong {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.opcion-pago__contenido small {
+  color: var(--texto-suave);
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.form-pago-condicional {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--fondo-panel);
+}
+
+.tarjeta-visual {
+  display: flex;
+  min-height: 154px;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 13px;
+  padding: 17px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #571C26, #8C2F39 58%, #B76D35);
+  box-shadow: 0 6px 14px rgba(42, 36, 34, 0.18);
+  color: var(--blanco);
+}
+
+.tarjeta-visual__marca {
+  font-family: var(--fuente-marca);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.tarjeta-visual__numero {
+  margin: 15px 0;
+  font-family: monospace;
+  font-size: 17px;
+  letter-spacing: 0.07em;
+}
+
+.tarjeta-visual__pie {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tarjeta-visual__pie div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tarjeta-visual__pie span {
+  opacity: 0.75;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.tarjeta-visual__pie strong {
+  overflow: hidden;
+  max-width: 185px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campos-pago-dobles {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr;
+  gap: 9px;
+}
+
+.form-pago-condicional .campo-form:last-child {
+  margin-bottom: 0;
+}
+
+.aviso-pago-simulado {
+  margin-top: 9px;
+  padding: 8px 9px;
+  border-left: 3px solid var(--secundario);
+  background: var(--secundario-suave);
+  color: #755911;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+@media (max-width: 640px) {
+  #mapa-entrega {
+    height: 175px;
+  }
+
+  .contenedor-mapa-entrega.mapa-expandido #mapa-entrega {
+    height: 300px;
+  }
+}
