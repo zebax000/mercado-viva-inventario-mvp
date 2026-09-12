@@ -271,10 +271,11 @@ body {
   right: -380px;
   z-index: 30;
   display: flex;
-  width: 360px;
+  width: 400px;
   max-width: 90vw;
   height: 100%;
   flex-direction: column;
+  overflow-y: auto;
   border-left: 1px solid var(--borde);
   background: var(--fondo-panel);
   box-shadow: -4px 0 16px rgba(42, 36, 34, 0.08);
@@ -286,11 +287,15 @@ body {
 }
 
 .panel-carrito__header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
   border-bottom: 1px solid var(--borde);
+  background: var(--fondo-panel);
   font-family: var(--fuente-marca);
 }
 
@@ -311,9 +316,7 @@ body {
 
 .lista-carrito {
   display: block;
-  overflow-y: auto;
-  flex: 1;
-  padding: 8px 16px;
+  padding: 10px 16px;
   list-style: none;
 }
 
@@ -1018,21 +1021,6 @@ body {
    Checkout profesional: dirección, mapa y pago simulado
    ============================================================ */
 
-.panel-carrito {
-  overflow: hidden;
-}
-
-.lista-carrito {
-  min-height: 110px;
-  flex-shrink: 0;
-}
-
-.panel-carrito__footer {
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-
 .campo-direccion-mapa {
   margin-bottom: 16px;
 }
@@ -1305,4 +1293,62 @@ body {
   .contenedor-mapa-entrega.mapa-expandido #mapa-entrega {
     height: 300px;
   }
+}
+.datos-entrega {
+  padding: 6px 0 18px;
+}
+
+.datos-entrega > .campo-form {
+  margin-bottom: 22px;
+}
+
+.opciones-entrega {
+  gap: 12px;
+}
+
+.opcion-entrega {
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.opcion-entrega:hover {
+  border-color: var(--secundario);
+  background: var(--secundario-suave);
+}
+
+.campo-direccion-mapa {
+  margin-bottom: 22px;
+  padding-top: 4px;
+  border-top: 1px solid var(--borde);
+}
+
+.campo-direccion-mapa > label:first-child {
+  display: block;
+  margin: 14px 0 8px;
+  font-weight: 600;
+}
+
+.bloque-pago {
+  padding-top: 14px;
+  border-top: 1px solid var(--borde);
+}
+
+.label-pago {
+  margin-bottom: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.opciones-metodo-pago {
+  gap: 10px;
+}
+
+.opcion-pago {
+  padding: 12px;
+}
+.panel-carrito__footer {
+  padding-bottom: 32px;
 }
