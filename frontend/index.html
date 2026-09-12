@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -437,24 +438,131 @@
         </div>
       </div>
 
-      <div class="campo-form" id="campo-direccion-entrega" hidden>
+      <div class="campo-form campo-direccion-mapa" id="campo-direccion-entrega" hidden>
         <label for="input-direccion-entrega">Dirección de entrega</label>
-        <input
-          type="text"
-          id="input-direccion-entrega"
-          placeholder="Calle, número, barrio"
-        >
+
+        <div class="direccion-acciones">
+          <input
+            type="text"
+            id="input-direccion-entrega"
+            placeholder="Ej: Calle 10 # 43-12, El Poblado, Medellín"
+            autocomplete="street-address"
+          >
+
+          <button id="btn-ubicar-direccion" class="btn-ubicar-direccion" type="button">
+            Ubicar
+          </button>
+        </div>
+
+        <p class="ayuda-direccion">
+          Escribe una dirección completa de Medellín y confírmala en el mapa antes de finalizar.
+        </p>
+
+        <p id="estado-ubicacion" class="estado-ubicacion" aria-live="polite"></p>
+
+        <div id="contenedor-mapa-entrega" class="contenedor-mapa-entrega" hidden>
+          <div id="mapa-entrega" aria-label="Mapa para confirmar la dirección de entrega"></div>
+
+          <label class="confirmacion-ubicacion">
+            <input id="check-confirmar-ubicacion" type="checkbox">
+            <span>Confirmo que el marcador corresponde a mi dirección de entrega.</span>
+          </label>
+        </div>
       </div>
 
-      <div class="campo-form">
-        <label for="select-metodo-pago">Método de pago</label>
+      <div class="campo-form bloque-pago">
+        <span class="label-pago">Método de pago</span>
 
-        <select id="select-metodo-pago">
-          <option value="" disabled selected>Selecciona una opción</option>
-          <option value="efectivo">Efectivo</option>
-          <option value="tarjeta">Tarjeta débito/crédito</option>
-          <option value="transferencia">Transferencia bancaria</option>
-        </select>
+        <div id="opciones-metodo-pago" class="opciones-metodo-pago" role="radiogroup" aria-label="Método de pago">
+          <label class="opcion-pago">
+            <input type="radio" name="metodo-pago" value="efectivo">
+            <span class="opcion-pago__icono" aria-hidden="true">$</span>
+            <span class="opcion-pago__contenido">
+              <strong>Efectivo</strong>
+              <small>Paga al recibir o recoger tu pedido.</small>
+            </span>
+          </label>
+
+          <label class="opcion-pago">
+            <input type="radio" name="metodo-pago" value="tarjeta">
+            <span class="opcion-pago__icono" aria-hidden="true">▣</span>
+            <span class="opcion-pago__contenido">
+              <strong>Tarjeta débito / crédito</strong>
+              <small>Datos usados solo para esta simulación.</small>
+            </span>
+          </label>
+
+          <label class="opcion-pago">
+            <input type="radio" name="metodo-pago" value="transferencia">
+            <span class="opcion-pago__icono" aria-hidden="true">↔</span>
+            <span class="opcion-pago__contenido">
+              <strong>Transferencia bancaria</strong>
+              <small>Confirma los datos de tu transferencia simulada.</small>
+            </span>
+          </label>
+        </div>
+
+        <div id="form-pago-tarjeta" class="form-pago-condicional" hidden>
+          <div class="tarjeta-visual" aria-hidden="true">
+            <div class="tarjeta-visual__marca">MERCADO VIVA</div>
+            <div id="vista-numero-tarjeta" class="tarjeta-visual__numero">•••• •••• •••• ••••</div>
+            <div class="tarjeta-visual__pie">
+              <div>
+                <span>TITULAR</span>
+                <strong id="vista-titular-tarjeta">NOMBRE DEL TITULAR</strong>
+              </div>
+              <div>
+                <span>VENCE</span>
+                <strong id="vista-vencimiento-tarjeta">MM/AA</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="campo-form">
+            <label for="input-titular-tarjeta">Nombre del titular</label>
+            <input id="input-titular-tarjeta" type="text" placeholder="Como aparece en la tarjeta" autocomplete="cc-name">
+          </div>
+
+          <div class="campo-form">
+            <label for="input-numero-tarjeta">Número de tarjeta</label>
+            <input id="input-numero-tarjeta" type="text" inputmode="numeric" maxlength="23" placeholder="0000 0000 0000 0000" autocomplete="cc-number">
+          </div>
+
+          <div class="campos-pago-dobles">
+            <div class="campo-form">
+              <label for="input-vencimiento-tarjeta">Vencimiento</label>
+              <input id="input-vencimiento-tarjeta" type="text" inputmode="numeric" maxlength="5" placeholder="MM/AA" autocomplete="cc-exp">
+            </div>
+
+            <div class="campo-form">
+              <label for="input-cvv-tarjeta">CVV</label>
+              <input id="input-cvv-tarjeta" type="password" inputmode="numeric" maxlength="4" placeholder="•••" autocomplete="cc-csc">
+            </div>
+          </div>
+        </div>
+
+        <div id="form-pago-transferencia" class="form-pago-condicional" hidden>
+          <div class="campo-form">
+            <label for="select-banco-transferencia">Banco de origen</label>
+            <select id="select-banco-transferencia">
+              <option value="" selected disabled>Selecciona tu banco</option>
+              <option value="Bancolombia">Bancolombia</option>
+              <option value="Davivienda">Davivienda</option>
+              <option value="Banco de Bogotá">Banco de Bogotá</option>
+              <option value="Nequi">Nequi</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div class="campo-form">
+            <label for="input-referencia-transferencia">Referencia de transferencia</label>
+            <input id="input-referencia-transferencia" type="text" maxlength="30" placeholder="Ej: TRX-123456">
+          </div>
+        </div>
+
+        <p id="aviso-pago-simulado" class="aviso-pago-simulado" hidden>
+          Pago simulado: no se realizará ningún cobro ni se almacenarán datos bancarios.
+        </p>
       </div>
 
       <p id="error-checkout" class="mensaje-error-form"></p>
@@ -572,6 +680,7 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="cliente.js"></script>
 </body>
 </html>
