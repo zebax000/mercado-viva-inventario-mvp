@@ -6,6 +6,97 @@ let CATEGORIA_ACTIVA = "";
 const UMBRAL_ENVIO_GRATIS = 30000;
 const COSTO_ENVIO = 5000;
 const DATOS_ENTREGA_KEY = "mercadoviva_datos_entrega";
+const PREFERENCIAS_CHECKOUT_KEY = "mercadoviva_preferencias_checkout";
+
+/*
+ * Zona de cobertura: Medellín y municipios cercanos del Valle de Aburrá.
+ * Este "viewbox" (izquierda, arriba, derecha, abajo) limita la búsqueda
+ * de direcciones a esta región, mejorando la precisión frente a una
+ * búsqueda global. Si en el futuro se cambia a Google Maps, este valor
+ * ya no se usa: Google recibe el sesgo geográfico de otra forma.
+ */
+const ZONA_COBERTURA_VIEWBOX = "-75.7328,6.1358,-75.4820,6.4189";
+
+let mapaEntrega = null;
+let marcadorEntrega = null;
+let UBICACION_ENTREGA_CONFIRMABLE = null;
+let ULTIMO_ID_TIMEOUT_COLAPSO_MAPA = null;
+
+/*
+ * ============================================================
+ * Capa de geocodificación (aislada del resto del checkout)
+ * ============================================================
+ * Estas dos funciones son el ÚNICO lugar que sabe que el proveedor
+ * es OpenStreetMap/Nominatim. Si más adelante se reemplaza por
+ * Google Maps (Geocoding API / Places), solo hay que reescribir
+ * el CONTENIDO de estas dos funciones, manteniendo la misma firma:
+ *
+ *   geocodificarDireccion(texto) -> { latitud, longitud, direccion }
+ *   geocodificarInverso(lat, lon) -> { direccion }
+ *
+ * Todo el resto de cliente.js (mapa, marcador, validaciones,
+ * checkout) seguirá funcionando sin cambios.
+ */
+
+async function geocodificarDireccion(direccion) {
+  const consulta = new URLSearchParams({
+    q: `${direccion}, Medellín, Antioquia, Colombia`,
+    format: "jsonv2",
+    limit: "1",
+    addressdetails: "1",
+    "accept-language": "es",
+    countrycodes: "co",
+    viewbox: ZONA_COBERTURA_VIEWBOX,
+    bounded: "1",
+  });
+
+  const respuesta = await fetch(
+    `https://nominatim.openstreetmap.org/search?${consulta.toString()}`
+  );
+
+  if (!respuesta.ok) {
+    throw new Error("El servicio de mapas no respondió correctamente.");
+  }
+
+  const resultados = await respuesta.json();
+
+  if (!resultados.length) {
+    throw new Error(
+      "No encontramos esa dirección en Medellín. Añade barrio, comuna o un punto de referencia."
+    );
+  }
+
+  const resultado = resultados[0];
+
+  return {
+    latitud: Number(resultado.lat),
+    longitud: Number(resultado.lon),
+    direccion: resultado.display_name,
+  };
+}
+
+async function geocodificarInverso(latitud, longitud) {
+  const consulta = new URLSearchParams({
+    lat: String(latitud),
+    lon: String(longitud),
+    format: "jsonv2",
+    "accept-language": "es",
+  });
+
+  const respuesta = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?${consulta.toString()}`
+  );
+
+  if (!respuesta.ok) {
+    throw new Error("No fue posible actualizar la dirección.");
+  }
+
+  const resultado = await respuesta.json();
+
+  return {
+    direccion: resultado.display_name || "Ubicación seleccionada en el mapa",
+  };
+}
 
 const METODOS_PAGO_LABEL = {
   efectivo: "Efectivo",
@@ -16,6 +107,7 @@ const METODOS_PAGO_LABEL = {
 document.addEventListener("DOMContentLoaded", () => {
   cargarCatalogo();
   cargarDatosEntregaGuardados();
+  cargarPreferenciasCheckout();
   render_carrito();
   inicializarSliderPromociones();
 
@@ -23,6 +115,30 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-cerrar-carrito").addEventListener("click", cerrarCarrito);
   document.getElementById("overlay").addEventListener("click", cerrarCarrito);
   document.getElementById("btn-confirmar-compra").addEventListener("click", confirmarCompra);
+
+  document
+    .getElementById("btn-ubicar-direccion")
+    .addEventListener("click", ubicarDireccionEnMapa);
+
+  document
+    .getElementById("input-direccion-entrega")
+    .addEventListener("input", invalidarConfirmacionUbicacion);
+
+  document.querySelectorAll('input[name="metodo-pago"]').forEach((radio) => {
+    radio.addEventListener("change", actualizarFormularioPago);
+  });
+
+  document
+    .getElementById("input-numero-tarjeta")
+    .addEventListener("input", formatearNumeroTarjeta);
+
+  document
+    .getElementById("input-vencimiento-tarjeta")
+    .addEventListener("input", formatearVencimientoTarjeta);
+
+  document
+    .getElementById("input-titular-tarjeta")
+    .addEventListener("input", actualizarVistaTarjeta);
 
   document.getElementById("input-buscar").addEventListener("input", () => {
     aplicarFiltrosYRenderizar();
@@ -253,8 +369,19 @@ function obtenerTipoEntregaSeleccionado() {
 
 function actualizarVisibilidadDireccion() {
   const esDomicilio = obtenerTipoEntregaSeleccionado() === "domicilio";
+  const campoDireccion = document.getElementById("campo-direccion-entrega");
 
-  document.getElementById("campo-direccion-entrega").hidden = !esDomicilio;
+  campoDireccion.hidden = !esDomicilio;
+
+  if (!esDomicilio) {
+    limpiarUbicacionEntrega();
+  } else {
+    setTimeout(() => {
+      if (mapaEntrega) {
+        mapaEntrega.invalidateSize();
+      }
+    }, 100);
+  }
 }
 
 function calcularCostoEnvio(subtotal, tipoEntrega) {
@@ -297,6 +424,11 @@ function aplicarDatosEntregaAlFormulario(datos) {
 
   if (datos.direccion) {
     document.getElementById("input-direccion-entrega").value = datos.direccion;
+  }
+
+  if (datos.tipo_entrega === "domicilio") {
+    document.getElementById("radio-domicilio").checked = true;
+    actualizarVisibilidadDireccion();
   }
 }
 
@@ -452,7 +584,6 @@ async function confirmarCompra() {
   }
 
   const errorEl = document.getElementById("error-checkout");
-
   errorEl.textContent = "";
 
   const nombreCompleto = document
@@ -466,13 +597,12 @@ async function confirmarCompra() {
     .trim();
 
   const tipoEntrega = obtenerTipoEntregaSeleccionado();
-
   const direccion = document
     .getElementById("input-direccion-entrega")
     .value
     .trim();
 
-  const metodoPago = document.getElementById("select-metodo-pago").value;
+  const metodoPago = obtenerMetodoPagoSeleccionado();
 
   if (!nombreCompleto || !telefono) {
     errorEl.textContent = "Nombre y teléfono son obligatorios.";
@@ -484,17 +614,38 @@ async function confirmarCompra() {
     return;
   }
 
+  if (tipoEntrega === "domicilio" && !UBICACION_ENTREGA_CONFIRMABLE) {
+    errorEl.textContent = "Ubica tu dirección en el mapa antes de continuar.";
+    return;
+  }
+
+  if (
+    tipoEntrega === "domicilio"
+    && !document.getElementById("check-confirmar-ubicacion").checked
+  ) {
+    errorEl.textContent = "Confirma que el marcador corresponde a tu dirección de entrega.";
+    return;
+  }
+
   if (!metodoPago) {
     errorEl.textContent = "Selecciona un método de pago.";
     return;
   }
 
-  const btn = document.getElementById("btn-confirmar-compra");
+  const errorPago = validarDatosPago(metodoPago);
 
+  if (errorPago) {
+    errorEl.textContent = errorPago;
+    return;
+  }
+
+  const btn = document.getElementById("btn-confirmar-compra");
   btn.disabled = true;
-  btn.textContent = "Procesando...";
+  btn.textContent = "Verificando pago simulado...";
 
   try {
+    await esperar(850);
+
     for (const item of carrito) {
       await apiFetch(`/productos/${item.codigo}/stock/ajuste`, {
         method: "POST",
@@ -509,22 +660,462 @@ async function confirmarCompra() {
       nombre_completo: nombreCompleto,
       telefono,
       direccion: tipoEntrega === "domicilio" ? direccion : "",
+      tipo_entrega: tipoEntrega,
     });
 
+    guardarPreferenciasCheckout({
+      tipo_entrega: tipoEntrega,
+      metodo_pago_preferido: metodoPago,
+    });
+
+    limpiarDatosPagoSensibles();
     vaciarCarrito();
     render_carrito();
     cerrarCarrito();
 
     mostrarConfirmacionCompra(METODOS_PAGO_LABEL[metodoPago] || "");
-
-    document.getElementById("select-metodo-pago").selectedIndex = 0;
-
     cargarCatalogo();
   } catch (error) {
     mostrarToast(`No se pudo completar la compra: ${error.message}`, "error");
   } finally {
     btn.disabled = false;
     btn.textContent = "Confirmar compra";
+  }
+}
+
+function esperar(milisegundos) {
+  return new Promise((resolver) => setTimeout(resolver, milisegundos));
+}
+
+function obtenerMetodoPagoSeleccionado() {
+  const radio = document.querySelector('input[name="metodo-pago"]:checked');
+  return radio ? radio.value : "";
+}
+
+function actualizarFormularioPago() {
+  const metodoPago = obtenerMetodoPagoSeleccionado();
+  const esTarjeta = metodoPago === "tarjeta";
+  const esTransferencia = metodoPago === "transferencia";
+
+  document.getElementById("form-pago-tarjeta").hidden = !esTarjeta;
+  document.getElementById("form-pago-transferencia").hidden = !esTransferencia;
+  document.getElementById("aviso-pago-simulado").hidden = !metodoPago;
+
+  if (!esTarjeta) {
+    limpiarCamposTarjeta();
+  }
+
+  if (!esTransferencia) {
+    document.getElementById("select-banco-transferencia").selectedIndex = 0;
+    document.getElementById("input-referencia-transferencia").value = "";
+  }
+}
+
+function validarDatosPago(metodoPago) {
+  if (metodoPago === "efectivo") {
+    return "";
+  }
+
+  if (metodoPago === "transferencia") {
+    const banco = document.getElementById("select-banco-transferencia").value;
+    const referencia = document
+      .getElementById("input-referencia-transferencia")
+      .value
+      .trim();
+
+    if (!banco || !referencia) {
+      return "Selecciona el banco e ingresa una referencia de transferencia.";
+    }
+
+    if (referencia.length < 4) {
+      return "La referencia de transferencia debe tener al menos 4 caracteres.";
+    }
+
+    return "";
+  }
+
+  const titular = document
+    .getElementById("input-titular-tarjeta")
+    .value
+    .trim();
+
+  const numero = obtenerDigitosTarjeta();
+  const vencimiento = document
+    .getElementById("input-vencimiento-tarjeta")
+    .value
+    .trim();
+
+  const cvv = document.getElementById("input-cvv-tarjeta").value.trim();
+
+  if (titular.split(/\s+/).filter(Boolean).length < 2) {
+    return "Ingresa el nombre completo del titular de la tarjeta.";
+  }
+
+  if (numero.length < 13 || numero.length > 19 || !numeroTarjetaValido(numero)) {
+    return "Ingresa un número de tarjeta válido para la simulación.";
+  }
+
+  if (!vencimientoValido(vencimiento)) {
+    return "Ingresa una fecha de vencimiento válida en formato MM/AA.";
+  }
+
+  if (!/^\d{3,4}$/.test(cvv)) {
+    return "El CVV debe tener 3 o 4 dígitos.";
+  }
+
+  return "";
+}
+
+function obtenerDigitosTarjeta() {
+  return document.getElementById("input-numero-tarjeta").value.replace(/\D/g, "");
+}
+
+function numeroTarjetaValido(numero) {
+  let suma = 0;
+  let duplicar = false;
+
+  for (let indice = numero.length - 1; indice >= 0; indice -= 1) {
+    let digito = Number(numero[indice]);
+
+    if (duplicar) {
+      digito *= 2;
+      if (digito > 9) {
+        digito -= 9;
+      }
+    }
+
+    suma += digito;
+    duplicar = !duplicar;
+  }
+
+  return suma % 10 === 0;
+}
+
+function vencimientoValido(valor) {
+  if (!/^\d{2}\/\d{2}$/.test(valor)) {
+    return false;
+  }
+
+  const [mesTexto, anioTexto] = valor.split("/");
+  const mes = Number(mesTexto);
+  const anio = 2000 + Number(anioTexto);
+
+  if (mes < 1 || mes > 12) {
+    return false;
+  }
+
+  const hoy = new Date();
+  const ultimoDiaVencimiento = new Date(anio, mes, 0, 23, 59, 59);
+  return ultimoDiaVencimiento >= hoy;
+}
+
+function formatearNumeroTarjeta(evento) {
+  const digitos = evento.target.value.replace(/\D/g, "").slice(0, 19);
+  evento.target.value = digitos.replace(/(.{4})/g, "$1 ").trim();
+  actualizarVistaTarjeta();
+}
+
+function formatearVencimientoTarjeta(evento) {
+  const digitos = evento.target.value.replace(/\D/g, "").slice(0, 4);
+  evento.target.value = digitos.length > 2
+    ? `${digitos.slice(0, 2)}/${digitos.slice(2)}`
+    : digitos;
+
+  actualizarVistaTarjeta();
+}
+
+function actualizarVistaTarjeta() {
+  const numero = obtenerDigitosTarjeta();
+  const titular = document
+    .getElementById("input-titular-tarjeta")
+    .value
+    .trim()
+    .toUpperCase();
+
+  const vencimiento = document
+    .getElementById("input-vencimiento-tarjeta")
+    .value
+    .trim();
+
+  document.getElementById("vista-numero-tarjeta").textContent = numero
+    ? numero.replace(/(.{4})/g, "$1 ").trim()
+    : "•••• •••• •••• ••••";
+
+  document.getElementById("vista-titular-tarjeta").textContent = titular || "NOMBRE DEL TITULAR";
+  document.getElementById("vista-vencimiento-tarjeta").textContent = vencimiento || "MM/AA";
+}
+
+function limpiarCamposTarjeta() {
+  document.getElementById("input-titular-tarjeta").value = "";
+  document.getElementById("input-numero-tarjeta").value = "";
+  document.getElementById("input-vencimiento-tarjeta").value = "";
+  document.getElementById("input-cvv-tarjeta").value = "";
+  actualizarVistaTarjeta();
+}
+
+function limpiarDatosPagoSensibles() {
+  limpiarCamposTarjeta();
+  document.getElementById("select-banco-transferencia").selectedIndex = 0;
+  document.getElementById("input-referencia-transferencia").value = "";
+
+  document.querySelectorAll('input[name="metodo-pago"]').forEach((radio) => {
+    radio.checked = false;
+  });
+
+  actualizarFormularioPago();
+}
+
+function guardarPreferenciasCheckout(preferencias) {
+  try {
+    localStorage.setItem(PREFERENCIAS_CHECKOUT_KEY, JSON.stringify(preferencias));
+  } catch {
+    /* Las preferencias son opcionales y no deben bloquear la compra. */
+  }
+}
+
+function cargarPreferenciasCheckout() {
+  try {
+    const preferencias = JSON.parse(
+      localStorage.getItem(PREFERENCIAS_CHECKOUT_KEY)
+    );
+
+    if (!preferencias) {
+      return;
+    }
+
+    if (preferencias.tipo_entrega === "domicilio") {
+      document.getElementById("radio-domicilio").checked = true;
+    }
+
+    if (preferencias.metodo_pago_preferido) {
+      const radio = document.querySelector(
+        `input[name="metodo-pago"][value="${preferencias.metodo_pago_preferido}"]`
+      );
+
+      if (radio) {
+        radio.checked = true;
+      }
+    }
+  } catch {
+    /* Sin preferencias guardadas: se conservan los valores por defecto. */
+  }
+
+  actualizarVisibilidadDireccion();
+  actualizarFormularioPago();
+}
+
+async function ubicarDireccionEnMapa() {
+  const direccion = document
+    .getElementById("input-direccion-entrega")
+    .value
+    .trim();
+
+  const estadoEl = document.getElementById("estado-ubicacion");
+  const boton = document.getElementById("btn-ubicar-direccion");
+
+  if (!direccion) {
+    estadoEl.textContent = "Ingresa una dirección antes de ubicarla.";
+    estadoEl.className = "estado-ubicacion estado-ubicacion--error";
+    return;
+  }
+
+  boton.disabled = true;
+  boton.textContent = "Buscando...";
+  estadoEl.textContent = "Buscando la dirección en Medellín...";
+  estadoEl.className = "estado-ubicacion";
+
+  try {
+    const resultado = await geocodificarDireccion(direccion);
+
+    document.getElementById("input-direccion-entrega").value = resultado.direccion;
+
+    await mostrarMapaEntrega(
+      resultado.latitud,
+      resultado.longitud,
+      resultado.direccion
+    );
+
+    estadoEl.textContent =
+      "Dirección encontrada. Toca el mapa o arrastra el punto para ajustarlo, luego confírmalo.";
+    estadoEl.className = "estado-ubicacion estado-ubicacion--exito";
+  } catch (error) {
+    limpiarUbicacionEntrega();
+    estadoEl.textContent = error.message || "No fue posible ubicar la dirección.";
+    estadoEl.className = "estado-ubicacion estado-ubicacion--error";
+  } finally {
+    boton.disabled = false;
+    boton.textContent = "Ubicar";
+  }
+}
+
+function mostrarMapaEntrega(latitud, longitud, direccionMostrada) {
+  return new Promise((resolver) => {
+    const contenedor = document.getElementById("contenedor-mapa-entrega");
+    const punto = [latitud, longitud];
+
+    contenedor.hidden = false;
+    contenedor.classList.add("mapa-expandido");
+
+    if (ULTIMO_ID_TIMEOUT_COLAPSO_MAPA) {
+      clearTimeout(ULTIMO_ID_TIMEOUT_COLAPSO_MAPA);
+    }
+
+    function inicializarOActualizarMapa() {
+      if (!mapaEntrega) {
+        mapaEntrega = L.map("mapa-entrega", {
+          zoomControl: true,
+          scrollWheelZoom: false,
+        });
+
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+          maxZoom: 19,
+          attribution: "Tiles © Esri — Source: Esri, DeLorme, NAVTEQ",
+        }).addTo(mapaEntrega);
+
+        mapaEntrega.on("click", async (evento) => {
+          await moverMarcadorYActualizar(evento.latlng.lat, evento.latlng.lng);
+        });
+
+        observarTamanoMapa(contenedor);
+      }
+
+      mapaEntrega.invalidateSize();
+      mapaEntrega.setView(punto, 16);
+
+      if (marcadorEntrega) {
+        marcadorEntrega.setLatLng(punto);
+      } else {
+        marcadorEntrega = L.marker(punto, { draggable: true }).addTo(mapaEntrega);
+
+        marcadorEntrega.on("dragend", async () => {
+          const nuevaUbicacion = marcadorEntrega.getLatLng();
+          await moverMarcadorYActualizar(nuevaUbicacion.lat, nuevaUbicacion.lng);
+        });
+      }
+
+      UBICACION_ENTREGA_CONFIRMABLE = {
+        latitud,
+        longitud,
+        direccion: direccionMostrada,
+      };
+
+      document.getElementById("check-confirmar-ubicacion").checked = false;
+
+      requestAnimationFrame(() => {
+        mapaEntrega.invalidateSize();
+        mapaEntrega.setView(punto, 16);
+      });
+
+      ULTIMO_ID_TIMEOUT_COLAPSO_MAPA = setTimeout(() => {
+        contenedor.classList.remove("mapa-expandido");
+
+        setTimeout(() => {
+          mapaEntrega.invalidateSize();
+          mapaEntrega.setView(marcadorEntrega.getLatLng(), 16);
+        }, 380);
+      }, 1600);
+
+      resolver();
+    }
+
+    /*
+     * El panel del carrito tiene una transición CSS al abrirse.
+     * Si el panel ya está abierto, se espera un frame; si no,
+     * se espera a que termine su animación antes de crear el mapa,
+     * porque Leaflet necesita que el contenedor ya tenga tamaño real.
+     */
+    const panel = document.getElementById("panel-carrito");
+
+    if (panel.classList.contains("abierto")) {
+      requestAnimationFrame(() => requestAnimationFrame(inicializarOActualizarMapa));
+    } else {
+      panel.addEventListener(
+        "transitionend",
+        () => requestAnimationFrame(inicializarOActualizarMapa),
+        { once: true }
+      );
+    }
+  });
+}
+
+function observarTamanoMapa(contenedor) {
+  if (typeof ResizeObserver === "undefined") {
+    return;
+  }
+
+  const observador = new ResizeObserver(() => {
+    if (mapaEntrega) {
+      mapaEntrega.invalidateSize();
+    }
+  });
+
+  observador.observe(contenedor);
+}
+
+async function moverMarcadorYActualizar(latitud, longitud) {
+  const estadoEl = document.getElementById("estado-ubicacion");
+
+  marcadorEntrega.setLatLng([latitud, longitud]);
+  document.getElementById("check-confirmar-ubicacion").checked = false;
+
+  estadoEl.textContent = "Actualizando la referencia del punto seleccionado...";
+  estadoEl.className = "estado-ubicacion";
+
+  try {
+    const resultado = await geocodificarInverso(latitud, longitud);
+
+    document.getElementById("input-direccion-entrega").value = resultado.direccion;
+
+    UBICACION_ENTREGA_CONFIRMABLE = {
+      latitud,
+      longitud,
+      direccion: resultado.direccion,
+    };
+
+    estadoEl.textContent = "Punto ajustado. Confirma que esta ubicación es correcta.";
+    estadoEl.className = "estado-ubicacion estado-ubicacion--exito";
+  } catch {
+    UBICACION_ENTREGA_CONFIRMABLE = {
+      latitud,
+      longitud,
+      direccion: "Ubicación seleccionada en el mapa",
+    };
+
+    estadoEl.textContent = "Punto ajustado. Confirma que esta ubicación es correcta.";
+    estadoEl.className = "estado-ubicacion estado-ubicacion--exito";
+  }
+}
+
+function invalidarConfirmacionUbicacion() {
+  if (!UBICACION_ENTREGA_CONFIRMABLE) {
+    return;
+  }
+
+  UBICACION_ENTREGA_CONFIRMABLE = null;
+  document.getElementById("check-confirmar-ubicacion").checked = false;
+  document.getElementById("estado-ubicacion").textContent = "La dirección cambió. Vuelve a ubicarla en el mapa.";
+  document.getElementById("estado-ubicacion").className = "estado-ubicacion";
+}
+
+function limpiarUbicacionEntrega() {
+  UBICACION_ENTREGA_CONFIRMABLE = null;
+
+  const contenedor = document.getElementById("contenedor-mapa-entrega");
+  const check = document.getElementById("check-confirmar-ubicacion");
+  const estado = document.getElementById("estado-ubicacion");
+
+  if (contenedor) {
+    contenedor.hidden = true;
+    contenedor.classList.remove("mapa-expandido");
+  }
+
+  if (check) {
+    check.checked = false;
+  }
+
+  if (estado) {
+    estado.textContent = "";
+    estado.className = "estado-ubicacion";
   }
 }
 
