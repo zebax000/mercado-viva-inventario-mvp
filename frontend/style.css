@@ -1018,8 +1018,19 @@ body {
    Checkout profesional: dirección, mapa y pago simulado
    ============================================================ */
 
+.panel-carrito {
+  overflow: hidden;
+}
+
+.lista-carrito {
+  min-height: 110px;
+  flex-shrink: 0;
+}
+
 .panel-carrito__footer {
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .campo-direccion-mapa {
