@@ -139,6 +139,9 @@ Las pruebas usan una base de datos SQLite en memoria (no tocan la base de datos 
 - **Base de datos:** Neon (PostgreSQL free tier).
 - **Frontend:** Vercel, conectado a la carpeta `frontend/`.
 
+## Link 
+https://mercado-viva-inventario-mvp.vercel.app/
+
 ## Diagrama BPMN
 
 El proceso esta modelado con 3 flujos: consulta, actualizacion de stock (venta/reposicion/correccion unificadas) y listado. El archivo se encuentra en `docs/`.
